@@ -1,0 +1,82 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Page</title>
+    <link rel="stylesheet" href="style_payment.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <header class="payment-header">
+            <a href="food-detail.html" class="back-button"><i class="fas fa-arrow-left"></i></a>
+            <h1>Order Summary</h1>
+        </header>
+
+        <main class="payment-content">
+            <section class="order-summary">
+                <div class="order-item">
+                    <div class="item-image">
+                        <img src="profile-picture.jpg" alt="Papaya Salad">
+                    </div>
+                    <div class="item-details">
+                        <h2>Papaya Salad</h2>
+                        <p>Size M</p>
+                        <a href="food_detail.html" class="edit-link">Edit</a>
+                    </div>
+                    <div class="item-quantity">
+                        <button class="quantity-btn minus"><i class="fas fa-minus"></i></button>
+                        <span class="quantity">1</span>
+                        <button class="quantity-btn plus"><i class="fas fa-plus"></i></button>
+                    </div>
+                    <div class="item-price">80 ฿</div>
+                </div>
+
+                <div class="order-item">
+                    <div class="item-image">
+                        <img src="profile-picture.jpg" alt="Sticky rice">
+                    </div>
+                    <div class="item-details">
+                        <h2>Sticky rice</h2>
+                        <p>Size S</p>
+                        <a href="food_detail.html" class="edit-link">Edit</a>
+                    </div>
+                    <div class="item-quantity">
+                        <button class="quantity-btn minus"><i class="fas fa-minus"></i></button>
+                        <span class="quantity">2</span>
+                        <button class="quantity-btn plus"><i class="fas fa-plus"></i></button>
+                    </div>
+                    <div class="item-price">30 ฿</div>
+                </div>
+            </section>
+
+            <section class="payment-methods">
+                <h2>Payment</h2>
+                <div class="payment-option">
+                    <input type="radio" id="cash" name="payment" value="cash">
+                    <label for="cash"><i class="fas fa-money-bill-alt"></i> Cash</label>
+                </div>
+                <div class="payment-option">
+                    <input type="radio" id="card" name="payment" value="card">
+                    <label for="card"><i class="fas fa-credit-card"></i> Cards</label>
+                </div>
+                <div class="payment-option">
+                    <input type="radio" id="mobile" name="payment" value="mobile">
+                    <label for="mobile"><i class="fas fa-mobile-alt"></i> Mobile banking</label>
+                </div>
+                <a href="#" class="more-options">more</a>
+            </section>
+
+            <section class="total-section">
+                <h2>Total</h2>
+                <div class="total-amount">130 ฿</div>
+            </section>
+
+            <button class="place-order-btn">Place order</button>
+        </main>
+    </div>
+    <script src="payment.js"></script>
+</body>
+</html>

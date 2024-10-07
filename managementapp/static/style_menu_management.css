@@ -1,0 +1,200 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap');
+@import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css');
+
+/* General styles */
+body {
+    font-family: 'Poppins', sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f9f9f9;
+    color: #333;
+    line-height: 1.6;
+}
+
+.container {
+    max-width: 100%;
+    margin: 0 auto;
+    padding: 0;
+}
+
+
+.menu-management {
+    padding: 15px;
+}
+
+.management-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.management-header h1 {
+    color: #ff6347;
+    margin-bottom: 15px;
+    font-size: 24px;
+    text-align: center;
+}
+
+.add-product-btn {
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    max-width: 200px;
+}
+
+.add-product-btn i {
+    margin-right: 5px;
+}
+
+.filter-section {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.search-bar {
+    display: flex;
+    align-items: center;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    overflow: hidden;
+}
+
+.search-bar input {
+    border: none;
+    padding: 10px;
+    flex-grow: 1;
+    font-size: 16px;
+}
+
+.search-icon {
+    background: none;
+    border: none;
+    padding: 10px;
+    cursor: pointer;
+}
+
+.category-select {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 16px;
+    width: 100%;
+}
+
+.menu-items-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.menu-item {
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    padding: 15px;
+}
+
+.menu-item-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.menu-item-name {
+    font-size: 18px;
+    font-weight: bold;
+    margin: 0;
+}
+
+.menu-item-price {
+    font-size: 16px;
+    font-weight: bold;
+    color: #ff6347;
+}
+
+.menu-item-details {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.menu-item-category {
+    font-size: 14px;
+    color: #666;
+}
+
+.menu-item-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.status-toggle {
+    position: relative;
+    display: inline-block;
+    width: 50px;
+    height: 24px;
+}
+
+.status-toggle input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: .4s;
+    border-radius: 24px;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 18px;
+    width: 18px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+}
+
+input:checked + .slider {
+    background-color: #2196F3;
+}
+
+input:checked + .slider:before {
+    transform: translateX(26px);
+}
+
+.edit-btn,
+.delete-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 18px;
+    color: #666;
+}
+
+.edit-btn:hover,
+.delete-btn:hover {
+    color: #333;
+}

@@ -1,0 +1,201 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Menu</title>
+    <link rel="stylesheet" href="{% static 'style_menu_list.css' %}">
+</head>
+<body>
+    <header class="sticky-header">
+        <div class="header-content">
+            <h1>MENU</h1>
+            <div class="search-bar">
+                <input type="text" placeholder="Search menu...">
+                <button class="search-icon">🔍</button>
+            </div>
+            <nav>
+                <ul>
+                    <li><a href="#recommend">Recommend</a></li>
+                    <li><a href="#food">Food</a></li>
+                    <li><a href="#appetizer">Appetizer</a></li>
+                    <li><a href="#drink">Drink</a></li>
+                    <li><a href="#dessert">Dessert</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main class="main-content" role="main">
+        <div class="container">
+            <section id="recommend" class="section">
+                <h2>Recommend</h2>
+                <div class="menu-grid">
+
+                    <!-- Recommended items -->
+                    <div class="menu-item">
+                        <div class="menu-item-image">
+                            <img src="profile-picture.jpg" alt="Papaya Salad">
+                        </div>
+                        <div class="menu-item-details">
+                            <div class="menu-item-name">Papaya Salad</div>
+                            <div class="menu-item-description">Grated green papaya, fresh cherry tomatoes, green beans, and garlic.</div>
+                            <div class="menu-item-price">60 Baht</div>
+                        </div>
+                        <button class="add-button" onclick="window.location.href='food_detail.html'">+</button>
+                    </div>
+
+                    <div class="menu-item">
+                        <div class="menu-item-image">
+                            <img src="profile-picture.jpg" alt="Papaya Salad">
+                        </div>
+                        <div class="menu-item-details">
+                            <div class="menu-item-name">Papaya Salad</div>
+                            <div class="menu-item-description">Grated green papaya, fresh cherry tomatoes, green beans, and garlic.</div>
+                            <div class="menu-item-price">60 Baht</div>
+                        </div>
+                        <button class="add-button" onclick="window.location.href='food_detail.html'">+</button>
+                    </div>
+
+                </div>
+            </section>
+
+            <!-- Food items -->
+            <section id="food" class="section">
+                <h2>Food</h2>
+                <div class="menu-grid">
+
+                    <div class="menu-item">
+                        <div class="menu-item-image">
+                            <img src="profile-picture.jpg" alt="Papaya Salad">
+                        </div>
+                        <div class="menu-item-details">
+                            <div class="menu-item-name">Papaya Salad</div>
+                            <div class="menu-item-description">Grated green papaya, fresh cherry tomatoes, green beans, and garlic.</div>
+                            <div class="menu-item-price">60 Baht</div>
+                        </div>
+                        <button class="add-button" onclick="window.location.href='food_detail.html'">+</button>
+                    </div>
+
+                    <div class="menu-item">
+                        <div class="menu-item-image">
+                            <img src="profile-picture.jpg" alt="Papaya Salad">
+                        </div>
+                        <div class="menu-item-details">
+                            <div class="menu-item-name">Papaya Salad</div>
+                            <div class="menu-item-description">Grated green papaya, fresh cherry tomatoes, green beans, and garlic.</div>
+                            <div class="menu-item-price">60 Baht</div>
+                        </div>
+                        <button class="add-button" onclick="window.location.href='food_detail.html'">+</button>
+                    </div>
+
+                </div>
+            </section>
+
+            <!-- appetizer items -->
+            <section id="appetizer" class="section">
+                <h2>Appetizer</h2>
+                <div class="menu-grid">
+
+                    <div class="menu-item">
+                        <div class="menu-item-image">
+                            <img src="profile-picture.jpg" alt="Papaya Salad">
+                        </div>
+                        <div class="menu-item-details">
+                            <div class="menu-item-name">Papaya Salad</div>
+                            <div class="menu-item-description">Grated green papaya, fresh cherry tomatoes, green beans, and garlic.</div>
+                            <div class="menu-item-price">60 Baht</div>
+                        </div>
+                        <button class="add-button" onclick="window.location.href='food_detail.html'">+</button>
+                    </div>
+
+                    <div class="menu-item">
+                        <div class="menu-item-image">
+                            <img src="profile-picture.jpg" alt="Papaya Salad">
+                        </div>
+                        <div class="menu-item-details">
+                            <div class="menu-item-name">Papaya Salad</div>
+                            <div class="menu-item-description">Grated green papaya, fresh cherry tomatoes, green beans, and garlic.</div>
+                            <div class="menu-item-price">60 Baht</div>
+                        </div>
+                        <button class="add-button" onclick="window.location.href='food_detail.html'">+</button>
+                    </div>
+                </div>
+
+            </section>
+
+            <!-- drink items -->
+            <section id="drink" class="section">
+                <h2>Drink</h2>
+                <div class="menu-grid">
+
+                    <div class="menu-item">
+                        <div class="menu-item-image">
+                            <img src="profile-picture.jpg" alt="Papaya Salad">
+                        </div>
+                        <div class="menu-item-details">
+                            <div class="menu-item-name">Papaya Salad</div>
+                            <div class="menu-item-description">Grated green papaya, fresh cherry tomatoes, green beans, and garlic.</div>
+                            <div class="menu-item-price">60 Baht</div>
+                        </div>
+                        <button class="add-button" onclick="window.location.href='food-detail.html'">+</button>
+                    </div>
+
+                    <div class="menu-item">
+                        <div class="menu-item-image">
+                            <img src="profile-picture.jpg" alt="Papaya Salad">
+                        </div>
+                        <div class="menu-item-details">
+                            <div class="menu-item-name">Papaya Salad</div>
+                            <div class="menu-item-description">Grated green papaya, fresh cherry tomatoes, green beans, and garlic.</div>
+                            <div class="menu-item-price">60 Baht</div>
+                        </div>
+                        <button class="add-button" onclick="window.location.href='food-detail.html'">+</button>
+                    </div>
+                </div>
+
+            </section>
+
+            <!-- dessert items -->
+            <section id="dessert" class="section">
+                <h2>Dessert</h2>
+                
+                <div class="menu-grid">
+                    <div class="menu-item">
+                        <div class="menu-item-image">
+                            <img src="profile-picture.jpg" alt="Papaya Salad">
+                        </div>
+                        <div class="menu-item-details">
+                            <div class="menu-item-name">Papaya Salad</div>
+                            <div class="menu-item-description">Grated green papaya, fresh cherry tomatoes, green beans, and garlic.</div>
+                            <div class="menu-item-price">60 Baht</div>
+                        </div>
+                        <button class="add-button" onclick="window.location.href='food-detail.html'">+</button>
+                    </div>
+
+                    <div class="menu-item">
+                        <div class="menu-item-image">
+                            <img src="profile-picture.jpg" alt="Papaya Salad">
+                        </div>
+                        <div class="menu-item-details">
+                            <div class="menu-item-name">Papaya Salad</div>
+                            <div class="menu-item-description">Grated green papaya, fresh cherry tomatoes, green beans, and garlic.</div>
+                            <div class="menu-item-price">60 Baht</div>
+                        </div>
+                        <button class="add-button" onclick="window.location.href='food-detail.html'">+</button>
+                    </div>
+                </div>
+
+            </section>
+        </div>
+    </main>
+
+    <button class="basket-button" onclick="window.location.href='food_detail.html'">
+        <i class="fas fa-shopping-basket"></i>
+        <span class="item-count">0</span>
+    </button>
+
+    <script src="menu_list.js"></script>
+</body>
+</html>

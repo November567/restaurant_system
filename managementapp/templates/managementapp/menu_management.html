@@ -1,0 +1,54 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Menu Management</title>
+    <link rel="stylesheet" href="{% static 'style_menu_management.css' %}" type="text/css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container menu-management">
+        <div class="management-header">
+            <h1>Menu Management</h1>
+            <a href="{% url 'add_product' %}" class="add-product-btn">
+                <i class="fas fa-plus"></i> Add Product
+            </a>
+        </div>
+        
+        <div class="filter-section">
+            <div class="search-bar">
+                <input type="text" placeholder="Search items..." id="search-input">
+                <button class="search-icon" id="search-button">
+                    <i class="fas fa-search"></i>
+                </button>
+            </div>
+            <select class="category-select" id="category-select">
+                <option value="">All Categories</option>
+                <option value="Food">Food</option>
+                <option value="Drinks">Drinks</option>
+                <option value="Desserts">Desserts</option>
+            </select>
+        </div>
+
+        <!-- Added the 'menu-list' div for dynamic content rendering -->
+        <div id="menu-list" class="menu-items-list">
+            {{ form.as_p }}
+            {% if menu_items %}
+                <ul>
+                    {% for item in menu_items %}
+                        <li>
+                            <strong>{{ item.name }}</strong> - ${{ item.price }} <br>
+                            <small>{{ item.description }}</small>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p>No menu items available.</p>
+            {% endif %}
+        </div>
+    </div>
+    <script src="{% static 'menu_management.js' %}"></script>
+</body>
+</html>

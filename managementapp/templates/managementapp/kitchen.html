@@ -1,0 +1,28 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kitchen Display System</title>
+    <link rel="stylesheet" href="style_kitchen.css">
+    <script src="https://kit.fontawesome.com/your-fontawesome-kit.js" crossorigin="anonymous"></script>
+</head>
+<body>
+    <div class="container kds-container">
+        <header class="kds-header">
+            <h1>Kitchen Display System</h1>
+            <nav class="kds-nav">
+                <button class="nav-btn active" data-status="all">All Orders</button>
+                <button class="nav-btn" data-status="in-progress">In Progress</button>
+                <button class="nav-btn" data-status="completed">Completed</button>
+            </nav>
+        </header>
+
+        <main class="kds-main" role="main">
+            <!-- Order cards will be dynamically inserted here -->
+        </main>
+    </div>
+    <script src="kitchen.js"></script>
+</body>
+</html>

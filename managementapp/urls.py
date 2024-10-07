@@ -13,6 +13,5 @@ urlpatterns = [
     path('api/menu_items/', views.menu_items_api, name='menu_items_api'),
     path('api/menu_items/<int:item_id>/delete/', views.delete_menu_item, name='delete_menu_item'),
     path('api/menu_items/<int:item_id>/update/', views.update_menu_item_status, name='update_menu_item_status'),
-    path('api/menu_items/getmenu', views.get_menu_items, name='get_menu_items'),
 ]
 

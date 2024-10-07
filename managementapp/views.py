@@ -48,11 +48,6 @@ def menu_items_api(request):
         ]
         return JsonResponse(items_data, safe=False)
     
-def get_menu_items(request):
-    menu_items = MenuItem.objects.all()
-    items_data = list(menu_items.values())  # Convert queryset to a list of dictionaries
-    return JsonResponse(items_data, safe=False)
-    
 @login_required
 def menu_management(request):
     menu_items = MenuItem.objects.all()  # Fetch all menu items

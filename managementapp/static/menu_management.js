@@ -2,16 +2,16 @@ document.addEventListener('DOMContentLoaded', function () {
     const addProductBtn = document.querySelector('.add-product-btn');
     const searchInput = document.querySelector('.search-bar input');
     const categorySelect = document.querySelector('.category-select');
-    const menuItemsList = document.querySelector('#menu-list');  // Ensure correct ID here
-    
+    const menuItemsList = document.querySelector('#menu-list');
+
+    let cachedMenuItems = [];
+    const socket = new WebSocket('ws://' + window.location.host + '/ws/menu_items/');
+
     if (!menuItemsList) {
         console.error("Element with ID 'menu-list' not found in the DOM.");
         return;
     }
 
-    let cachedMenuItems = [];
-
-    // Fetch menu items from the backend
     fetch('/api/menu_items/')
         .then(response => response.json())
         .then(data => {
@@ -22,11 +22,30 @@ document.addEventListener('DOMContentLoaded', function () {
             console.error('Error fetching menu items:', error);
         });
 
+    // WebSocket event handlers
+    socket.onopen = function () {
+        console.log("WebSocket connection established");
+    };
+
+    socket.onmessage = function (event) {
+        const menuItems = JSON.parse(event.data);
+        cachedMenuItems = menuItems;
+        renderMenuItems(cachedMenuItems);
+    };
+
+    socket.onclose = function () {
+        console.log("WebSocket connection closed");
+    };
+
+    socket.onerror = function (error) {
+        console.error("WebSocket error: ", error);
+    };
+
     // Add product button functionality
     if (addProductBtn) {
         addProductBtn.addEventListener('click', function (e) {
             e.preventDefault();
-            window.location.href = '/add_product';  // Navigate to add product page
+            window.location.href = '/add_product';
         });
     }
 
@@ -51,6 +70,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         renderMenuItems(filteredItems);
     }
+
     // Update the item status (availability)
     function updateItemStatus(itemId, available) {
         fetch(`/api/menu_items/${itemId}/update/`, {
@@ -63,8 +83,13 @@ document.addEventListener('DOMContentLoaded', function () {
         })
         .then(response => response.json())
         .then(data => {
-            if (response.ok) {
+            if (data.success) {
                 console.log(`Item ${itemId} availability updated to ${available}`);
+                const itemIndex = cachedMenuItems.findIndex(item => item.id === itemId);
+                if (itemIndex !== -1) {
+                    cachedMenuItems[itemIndex].available = available;
+                    renderMenuItems(cachedMenuItems);
+                }
             } else {
                 console.error(`Failed to update item ${itemId}: ${data.error}`);
             }
@@ -97,7 +122,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 <span class="menu-item-category">${item.category}</span>
                 <div class="menu-item-actions">
                     <label class="status-toggle">
-                        <input type="checkbox" ${item.status ? 'checked' : ''}>
+                        <input type="checkbox" ${item.available ? 'checked' : ''}>
                         <span class="slider"></span>
                     </label>
                     <button class="edit-btn"><i class="fas fa-edit"></i></button>
@@ -139,11 +164,8 @@ document.addEventListener('DOMContentLoaded', function () {
             .then(response => {
                 if (response.ok) {
                     console.log(`Item ${itemId} deleted successfully.`);
-                    const itemIndex = cachedMenuItems.findIndex(item => item.id === itemId);
-                    if (itemIndex !== -1) {
-                        cachedMenuItems.splice(itemIndex, 1);
-                        renderMenuItems(cachedMenuItems);
-                    }
+                    cachedMenuItems = cachedMenuItems.filter(item => item.id !== itemId);
+                    renderMenuItems(cachedMenuItems);
                 } else {
                     console.error(`Failed to delete item ${itemId}`);
                 }
@@ -169,24 +191,4 @@ document.addEventListener('DOMContentLoaded', function () {
         }
         return cookieValue;
     }
-
-    // WebSocket setup for real-time menu item updates
-    const socket = new WebSocket('ws://' + window.location.host + '/ws/menu_items/');
-
-    socket.onmessage = function (event) {
-        const menuItems = JSON.parse(event.data);
-        renderMenuItems(menuItems);
-    };
-
-    socket.onopen = function () {
-        console.log("WebSocket connection established");
-    };
-
-    socket.onclose = function () {
-        console.log("WebSocket connection closed");
-    };
-
-    socket.onerror = function (error) {
-        console.error("WebSocket error: ", error);
-    };
 });

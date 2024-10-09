@@ -1,5 +1,28 @@
 // menu-script.js
 document.addEventListener('DOMContentLoaded', function() {
+
+    const socket = new WebSocket('ws://' + window.location.host + '/ws/menu_items/');
+
+    // WebSocket event handlers
+    socket.onopen = function() {
+        console.log("WebSocket connection established");
+    };
+
+    socket.onmessage = function(event) {
+        // When the server sends data, parse and update the menu items
+        const menuItems = JSON.parse(event.data);
+        console.log("Received menu items update: ", menuItems);
+        updateMenuItems(menuItems);  // Call a function to render new menu items
+    };
+
+    socket.onclose = function() {
+        console.log("WebSocket connection closed");
+    };
+
+    socket.onerror = function(error) {
+        console.error("WebSocket error: ", error);
+    };
+
     // Smooth scrolling for navigation links
     document.querySelectorAll('nav a').forEach(anchor => {
         anchor.addEventListener('click', function (e) {
@@ -76,6 +99,41 @@ document.addEventListener('DOMContentLoaded', function() {
         document.querySelectorAll('img.lazy').forEach(img => {
             img.src = img.dataset.src;
             img.classList.remove('lazy');
+        });
+    }
+    // Function to update menu items dynamically
+    function updateMenuItems(items) {
+        const menuList = document.querySelector('#menu-list');
+        menuList.innerHTML = ''; // Clear existing menu items
+
+        items.forEach(item => {
+            const menuItem = document.createElement('div');
+            menuItem.classList.add('menu-item');
+
+            menuItem.innerHTML = `
+                <div class="menu-item-image">
+                    <img src="${item.image}" alt="${item.name}" />
+                </div>
+                <div class="menu-item-details">
+                    <div class="menu-item-name">${item.name}</div>
+                    <div class="menu-item-description">${item.description}</div>
+                    <div class="menu-item-price">${item.price} Baht</div>
+                </div>
+                <button class="add-button">+</button>
+            `;
+
+            // Add event listener for the "Add to Cart" button
+            menuItem.querySelector('.add-button').addEventListener('click', function() {
+                console.log(`Added to cart: ${item.name}`);
+                this.textContent = '✓';
+                this.style.backgroundColor = '#4CAF50';
+                setTimeout(() => {
+                    this.textContent = '+';
+                    this.style.backgroundColor = '#ff6347';
+                }, 1000);
+            });
+
+            menuList.appendChild(menuItem);
         });
     }
 });

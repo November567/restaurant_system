@@ -12,8 +12,17 @@ import json
 
 def menu_list(request, table_id):
     table = get_object_or_404(Table, pk=table_id)
-    menu_items = MenuItem.objects.filter(available=True)
     
+    # Get all menu items and organize them by category
+    menu_items = MenuItem.objects.filter(available=True)
+    categories = {
+        'Recommend': menu_items.filter(category='Recommend'),
+        'Food': menu_items.filter(category='Food'),
+        'Appetizer': menu_items.filter(category='Appetizer'),
+        'Drink': menu_items.filter(category='Drink'),
+        'Dessert': menu_items.filter(category='Dessert'),
+    }
+
     if request.method == 'POST':
         selected_items = request.POST.getlist('items')
         special_requests = request.POST.get('special_requests', '')
@@ -29,10 +38,13 @@ def menu_list(request, table_id):
         
         # Redirect to a confirmation page or another view
         return redirect('order_confirmation', order_id=order.id)
-    
-    return render(request, 'managementapp/menu_list.html', {'table': table, 'menu_items': menu_items})
 
+    return render(request, 'managementapp/menu_list.html', {'table': table, 'categories': categories})
 
+def food_detail(request, item_id):
+    return  render(request, 'managementapp/food_detail.html')
+
+@login_required
 def menu_items_api(request):
     if request.method == 'GET':
         menu_items = MenuItem.objects.all()
@@ -43,6 +55,7 @@ def menu_items_api(request):
                 'category': item.category,
                 'price': str(item.price),  # Convert Decimal to String for JSON
                 'status': item.available,
+                'image': str(item.image),
             }
             for item in menu_items
         ]
@@ -59,10 +72,16 @@ def menu_management(request):
 @login_required
 def add_product(request):
     if request.method == 'POST':
-        form = MenuItemForm(request.POST)  # Capture form data
+        form = MenuItemForm(request.POST, request.FILES)
         if form.is_valid():
-            form.save()  # Save the new product to the MenuItem model
-            return redirect('menu_management')  # Redirect after saving
+            # ตรวจสอบว่ามีการอัปโหลดรูปภาพหรือไม่
+            if form.cleaned_data['image']:  # ตรวจสอบว่ามีไฟล์หรือไม่
+                form.save()
+                return redirect('menu_management')  # เปลี่ยนเส้นทางหลังจากบันทึก
+            else:
+                form.add_error('image', 'Please upload an image.')   # Redirect after saving
+        else:
+            print(form.errors)
     else:
         form = MenuItemForm()
 
@@ -78,11 +97,13 @@ def edit_menu_item(request, item_id):
 
     if request.method == 'POST':
         print("Received POST request")  # Debug print
-        form = MenuItemForm(request.POST, instance=menu_item)
+        form = MenuItemForm(request.POST, request.FILES, instance=menu_item)
         if form.is_valid():
             print("Form is valid, saving...")  # Debug print
             form.save()
             return redirect('menu_management')
+        else:
+            print(form.errors)
     else:
         print("Displaying edit form")  # Debug print
         form = MenuItemForm(instance=menu_item)

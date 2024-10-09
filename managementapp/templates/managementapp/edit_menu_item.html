@@ -11,7 +11,7 @@
 <body>
     <div class="edit-record-box">
         <h2>Edit Menu</h2>
-        <form method="POST">
+        <form method="POST" enctype="multipart/form-data">
             {% csrf_token %}
 
             {% if form.errors %}
@@ -41,6 +41,10 @@
             <div class="input-box">
                 {{ form.category }}
                 <label>Category</label>
+            </div>
+            <div class="input-box">
+                {{ form.image }}
+                <label>Image</label>
             </div>
             <button type="submit" class="btn">Save Changes</button>
         </form>

@@ -10,9 +10,11 @@ class Table(models.Model):
 
 class MenuItem(models.Model):
     CATEGORY_CHOICES = [
+        ('Recommend', 'Recommend'),
         ('Food', 'Food'),
-        ('Drinks', 'Drinks'),
-        ('Desserts', 'Desserts'),
+        ('Appetizer', 'Appetizer'),
+        ('Drink', 'Drink'),
+        ('Dessert', 'Dessert'),
     ]
 
     name = models.CharField(max_length=100)
@@ -20,7 +22,7 @@ class MenuItem(models.Model):
     price = models.DecimalField(max_digits=6, decimal_places=2)
     available = models.BooleanField(default=True)
     category = models.CharField(max_length=20, choices=CATEGORY_CHOICES, default='Food')
-    #image = models.ImageField(upload_to='menu_images/', null=True, blank=True)  
+    image = models.ImageField(upload_to='menu_items/', blank=True, null=True)
 
     def __str__(self):
         return f"{self.name} (${self.price})"

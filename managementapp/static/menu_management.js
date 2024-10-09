@@ -3,6 +3,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const searchInput = document.querySelector('.search-bar input');
     const categorySelect = document.querySelector('.category-select');
     const menuItemsList = document.querySelector('#menu-list');
+    const loadingIndicator = document.querySelector('.loading-indicator'); // Add a loading indicator in your HTML
 
     let cachedMenuItems = [];
     const socket = new WebSocket('ws://' + window.location.host + '/ws/menu_items/');
@@ -12,14 +13,26 @@ document.addEventListener('DOMContentLoaded', function () {
         return;
     }
 
+    // Show loading state
+    function showLoading(isLoading) {
+        if (loadingIndicator) {
+            loadingIndicator.style.display = isLoading ? 'block' : 'none';
+        }
+    }
+
+    // Show loading before fetching
+    showLoading(true);
+
     fetch('/api/menu_items/')
         .then(response => response.json())
         .then(data => {
             cachedMenuItems = data;
             renderMenuItems(cachedMenuItems);
+            showLoading(false);  // Hide loading once data is rendered
         })
         .catch(error => {
             console.error('Error fetching menu items:', error);
+            showLoading(false);  // Hide loading even if there is an error
         });
 
     // WebSocket event handlers
@@ -69,34 +82,6 @@ document.addEventListener('DOMContentLoaded', function () {
         });
 
         renderMenuItems(filteredItems);
-    }
-
-    // Update the item status (availability)
-    function updateItemStatus(itemId, available) {
-        fetch(`/api/menu_items/${itemId}/update/`, {
-            method: 'PATCH',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': getCookie('csrftoken'),
-            },
-            body: JSON.stringify({ available: available }),
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                console.log(`Item ${itemId} availability updated to ${available}`);
-                const itemIndex = cachedMenuItems.findIndex(item => item.id === itemId);
-                if (itemIndex !== -1) {
-                    cachedMenuItems[itemIndex].available = available;
-                    renderMenuItems(cachedMenuItems);
-                }
-            } else {
-                console.error(`Failed to update item ${itemId}: ${data.error}`);
-            }
-        })
-        .catch(error => {
-            console.error('Error updating item:', error);
-        });
     }
 
     // Render menu items in the UI
@@ -191,4 +176,33 @@ document.addEventListener('DOMContentLoaded', function () {
         }
         return cookieValue;
     }
+
+    // Update the item status (availability)
+    function updateItemStatus(itemId, available) {
+        fetch(`/api/menu_items/${itemId}/update/`, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken'),
+            },
+            body: JSON.stringify({ available: available }),
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                console.log(`Item ${itemId} availability updated to ${available}`);
+                const itemIndex = cachedMenuItems.findIndex(item => item.id === itemId);
+                if (itemIndex !== -1) {
+                    cachedMenuItems[itemIndex].available = available;
+                    renderMenuItems(cachedMenuItems);
+                }
+            } else {
+                console.error(`Failed to update item ${itemId}: ${data.error}`);
+            }
+        })
+        .catch(error => {
+            console.error('Error updating item:', error);
+        });
+    }
+
 });

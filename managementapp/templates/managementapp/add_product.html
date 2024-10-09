@@ -9,7 +9,7 @@
 <body>
     <div class="container">
         <h1>Add New Product</h1>
-        <form method="POST" action="">
+        <form method="POST" enctype="multipart/form-data">
             {% csrf_token %}
             {{ form.as_p }}  <!-- This will render the form fields -->
             <button type="submit" class="btn btn-primary">Add Product</button>

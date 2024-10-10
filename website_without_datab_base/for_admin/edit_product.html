@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Product - Restaurant Management System</title>
+    <link rel="stylesheet" href="style_edit_product.css">
+</head>
+<body>
+    <div class="container edit-product">
+        <div class="management-header">
+            <button class="back-btn" onclick="location.href='menu_management.html'">
+                <i class="fas fa-arrow-left"></i> Back to Menu Management
+            </button>
+            
+            <h1>Edit Product</h1>
+            <div class="placeholder"></div>
+        </div>
+        <form id="edit-product-form" class="product-form">
+            <div class="form-group">
+                <label for="product-name">Product Name</label>
+                <input type="text" id="product-name" name="product-name" required>
+            </div>
+            <div class="form-group">
+                <label for="product-price">Price (฿)</label>
+                <input type="number" id="product-price" name="product-price" step="10" required>
+            </div>
+            <div class="form-group">
+                <label for="product-category">Category</label>
+                <select id="product-category" name="product-category" required>
+                    <option value="">Select a category</option>
+                    <option value="food">Food</option>
+                    <option value="food">Appetizer</option>
+                    <option value="drinks">Drinks</option>
+                    <option value="desserts">Desserts</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="product-description">Description</label>
+                <textarea id="product-description" name="product-description" rows="4"></textarea>
+            </div>
+            <div class="form-group">
+                <label for="product-image">Product Image</label>
+                <input type="file" id="product-image" name="product-image" accept="image/*">
+            </div>
+            <div class="form-actions">
+                <button type="submit" class="submit-btn">Edit Product</button>
+                <button type="button" class="cancel-btn" onclick="location.href='menu_management.html'">Cancel</button>
+            </div>
+        </form>
+    </div>
+    <script src="edit_product.js"></script>
+</body>
+</html>

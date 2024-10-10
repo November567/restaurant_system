@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>View Order Details</title>
+    <link rel="stylesheet" href="style_view_detail.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container view-details-container">
+        <div class="management-header">
+
+            <button class="back-btn" onclick="location.href='menu_management.html'">
+                <i class="fas fa-arrow-left"></i> Back to Kitchen Display System
+            </button>
+            
+            <h1>Order Details</h1>
+            <div class="nav-button-container">
+                <button class="nav-button"><i class="fas fa-bars"></i></button>
+                <div class="nav-dropdown">
+                    <a href="kitchen.html">Kitchen</a>
+                    <a href="reporting.html">Reporting</a>
+                    <a href="menu_management.html">Menu Management</a>
+                </div>
+            </div>
+        </div>
+    
+        <div class="order-details">
+            <div class="order-summary">
+                <h2>Order #<span id="orderId"></span></h2>
+                <p>Status: <span id="orderStatus"></span></p>
+                <p>Time: <span id="orderTime"></span></p>
+            </div>
+    
+            <div class="order-items">
+                <h3>Order Items</h3>
+                <ul id="itemsList"></ul>
+            </div>
+    
+            <div class="order-total">
+                <h3>Total: ฿<span id="orderTotal"></span></h3>
+            </div>
+    
+            <div class="order-actions">
+                <button id="completeOrderBtn" class="btn btn-primary"><i class="fas fa-check"></i>Complete Order</button>
+                <button id="cancelOrderBtn" class="btn btn-secondary"><i class="fas fa-times"></i>Cancel Order</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="view_detail.js"></script>
+</body>
+</html>

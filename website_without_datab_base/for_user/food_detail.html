@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Papaya Salad</title>
+    <link rel="stylesheet" href="style_food_detail.css">
+</head>
+<body>
+    <div class="container">
+        <div class="item-header">
+            <button class="back-button" onclick="window.location.href='menu_list.html'"><i class="fas fa-arrow-left"></i></button>
+        </div>
+
+        <div class="item-content">
+            <div class="item-price">Papaya Salad <br> 60 Baht</div>
+
+            <div class="section size-section">
+                <h2>Size</h2>
+                <div class="size-options">
+                    <label class="size-option">
+                        <input type="radio" name="size" value="S" checked>
+                        <span>S</span>
+                        <span class="price-change">+0</span>
+                    </label>
+                    <label class="size-option">
+                        <input type="radio" name="size" value="M">
+                        <span>M</span>
+                        <span class="price-change">+20</span>
+                    </label>
+                    <label class="size-option">
+                        <input type="radio" name="size" value="L">
+                        <span>L</span>
+                        <span class="price-change">+40</span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="section note-section">
+                <h2>Note to restaurant</h2>
+                <textarea placeholder="Add your special instructions here..."></textarea>
+            </div>
+
+            <div class="section quantity-section">
+                <button class="quantity-btn minus">-</button>
+                <span class="quantity">1</span>
+                <button class="quantity-btn plus">+</button>
+            </div>
+
+            <button class="add-to-cart" onclick="window.location.href='menu_list.html'">Add to Cart - 160 Baht</button>
+        </div>
+    </div>
+    <script src="food_detail.js"></script>
+</body>
+</html>

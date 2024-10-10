@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Menu Management</title>
+    <link rel="stylesheet" href="style_menu_management.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container menu-management">
+        <div class="management-header">
+            <h1>Menu Management</h1>
+            <button class="add-product-btn" onclick="location.href='add_product.html'">
+                <i class="fas fa-plus"></i> Add Product
+            </button>
+            <div class="nav-button-container">
+                <button class="nav-button">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <div class="nav-dropdown">
+                    <a href="kitchen.html">Kitchen</a>
+                    <a href="reporting.html">Reporting</a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="filter-section">
+            <div class="search-bar">
+                <input type="text" placeholder="Search items...">
+                <button class="search-icon">
+                    <i class="fas fa-search"></i>
+                </button>
+            </div>
+            <select class="category-select">
+                <option value="">All Categories</option>
+                <option value="Food">Food</option>
+                <option value="Food">Appetizer</option>
+                <option value="Drinks">Drinks</option>
+                <option value="Desserts">Desserts</option>
+            </select>
+        </div>
+
+        <div class="menu-items-list">
+            <!-- Menu items will be dynamically added here -->
+        </div>
+    </div>
+    <script src="menu_management.js"></script>
+</body>
+</html>

@@ -1,14 +1,17 @@
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     const sizeOptions = document.querySelectorAll('.size-options input');
     const quantityValue = document.querySelector('.quantity');
     const minusBtn = document.querySelector('.quantity-btn.minus');
     const plusBtn = document.querySelector('.quantity-btn.plus');
     const addToCartBtn = document.querySelector('.add-to-cart');
-    let basePrice = 60; // This should be dynamically set based on the item
+    const basePriceText = document.querySelector('#total-price').innerText;
+    const basePriceFloat = parseFloat(basePriceText.replace(/[^\d.-]/g, '')); // This will handle strings like "200.00"
+    const basePrice = Math.floor(basePriceFloat);
+
 
     // Size selection
     sizeOptions.forEach(option => {
-        option.addEventListener('change', function() {
+        option.addEventListener('change', function () {
             const priceChange = parseInt(this.parentElement.querySelector('.price-change').textContent.replace('+', ''));
             updateTotalPrice(priceChange);
         });
@@ -29,19 +32,20 @@ document.addEventListener('DOMContentLoaded', function() {
         const quantity = parseInt(quantityValue.textContent);
         const selectedSize = document.querySelector('.size-options input:checked');
         const sizePriceChange = parseInt(selectedSize.parentElement.querySelector('.price-change').textContent.replace('+', ''));
+        console.log(sizePriceChange + basePrice)
         const totalPrice = (basePrice + sizePriceChange) * quantity;
         addToCartBtn.textContent = `Add to Cart - ${totalPrice} Baht`;
     }
 
     // Add to cart
-    addToCartBtn.addEventListener('click', function() {
+    addToCartBtn.addEventListener('click', function () {
         const size = document.querySelector('.size-options input:checked').value;
         const quantity = parseInt(quantityValue.textContent);
         const note = document.querySelector('textarea').value;
-        
+
         // You would typically send this to a cart management function
         console.log(`Added to cart: Papaya salad - Size: ${size}, Quantity: ${quantity}, Note: ${note}`);
-        
+
         // Provide visual feedback
         const originalText = this.textContent;
         this.textContent = 'Added to Cart!';

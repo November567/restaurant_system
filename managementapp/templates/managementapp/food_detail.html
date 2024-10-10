@@ -1,55 +1,77 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Papaya Salad</title>
-    <link rel="stylesheet" href="style_food_detail.css">
+    <title>{{ menu_item.name }}</title> <!-- Dynamic title -->
+    <link rel="stylesheet" href="{% static 'style_food_detail.css' %}">
+    <style>
+        .item-header {
+            position: relative;
+            background-image: url('{{ menu_item.image.url }}');
+            background-size: cover;
+            background-position: center;
+            height: 200px;
+            display: flex;
+            align-items: flex-end;
+            padding: 20px;
+            color: white;
+        }
+    </style>
 </head>
+
 <body>
     <div class="container">
-        <div class="item-header">
-            <button class="back-button" onclick="window.location.href='menu_list.html'"><i class="fas fa-arrow-left"></i></button>
-        </div>
+        <form method="POST">
+            {% csrf_token %}
+            <div class="item-header">
+                <button class="back-button" onclick="window.history.back()"><i class="fas fa-arrow-left"></i></button>
+            </div>
 
-        <div class="item-content">
-            <div class="item-price">Papaya Salad <br> 60 Baht</div>
+            <div class="item-content">
+                <div class="item-price">{{ menu_item.name }} <br> {{ menu_item.price }} Baht</div>
 
-            <div class="section size-section">
-                <h2>Size</h2>
-                <div class="size-options">
-                    <label class="size-option">
-                        <input type="radio" name="size" value="S" checked>
-                        <span>S</span>
-                        <span class="price-change">+0</span>
-                    </label>
-                    <label class="size-option">
-                        <input type="radio" name="size" value="M">
-                        <span>M</span>
-                        <span class="price-change">+20</span>
-                    </label>
-                    <label class="size-option">
-                        <input type="radio" name="size" value="L">
-                        <span>L</span>
-                        <span class="price-change">+40</span>
-                    </label>
+                <div class="section size-section">
+                    <h2>Size</h2>
+                    <div class="size-options">
+                        <label class="size-option">
+                            <input type="radio" name="size" value="S" checked>
+                            <span>S</span>
+                            <span class="price-change">+0</span>
+                        </label>
+                        <label class="size-option">
+                            <input type="radio" name="size" value="M">
+                            <span>M</span>
+                            <span class="price-change">+20</span>
+                        </label>
+                        <label class="size-option">
+                            <input type="radio" name="size" value="L">
+                            <span>L</span>
+                            <span class="price-change">+40</span>
+                        </label>
+                    </div>
                 </div>
-            </div>
 
-            <div class="section note-section">
-                <h2>Note to restaurant</h2>
-                <textarea placeholder="Add your special instructions here..."></textarea>
-            </div>
+                <div class="section note-section">
+                    <h2>Note to restaurant</h2>
+                    <textarea id="special_requests" name = "special_requests" placeholder="Add your special instructions here..."></textarea>
+                </div>
 
-            <div class="section quantity-section">
-                <button class="quantity-btn minus">-</button>
-                <span class="quantity">1</span>
-                <button class="quantity-btn plus">+</button>
-            </div>
+                <div class="section quantity-section">
+                    <button class="quantity-btn minus" type="button">-</button>
+                    <span class="quantity">1</span>
+                    <button class="quantity-btn plus" type="button">+</button>
+                </div>
 
-            <button class="add-to-cart" onclick="window.location.href='menu_list.html'">Add to Cart - 160 Baht</button>
-        </div>
+                <button class="add-to-cart" onclick="addToCart('{{ menu_item.id }}', '{{ menu_item.price }}')">Add to
+                    Cart -
+                    <span id="total-price">{{ menu_item.price }}</span> Baht</button>
+            </div>
+        </form>
     </div>
-    <script src="food_detail.js"></script>
+    <script src="{% static 'food_detail.js' %}"></script>
 </body>
+
 </html>

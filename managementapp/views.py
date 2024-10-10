@@ -3,7 +3,6 @@ from .models import Table, MenuItem, Order, Payment
 from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_http_methods
-from django.views.decorators.csrf import csrf_exempt
 from django.db.models import Sum, Count, Avg
 from django.shortcuts import render, get_object_or_404, redirect
 from .models import Table, MenuItem, Order, OrderItem
@@ -23,26 +22,29 @@ def menu_list(request, table_id):
         'Dessert': menu_items.filter(category='Dessert'),
     }
 
+    return render(request, 'managementapp/menu_list.html', {'table': table, 'categories': categories})
+
+def food_detail(request, item_id, table):
+    # Retrieve the menu item based on the provided item_id
+    menu_item = get_object_or_404(MenuItem, pk=item_id)
+
     if request.method == 'POST':
-        selected_items = request.POST.getlist('items')
+        selected_items = request.POST.getlist('items', [item_id])  # Include the current item by default
         special_requests = request.POST.get('special_requests', '')
-        
+
         # Create an order
         order = Order(table=table, special_requests=special_requests)
         order.save()
-        
+
         # Add selected menu items to the order
         for item_id in selected_items:
-            item = MenuItem.objects.get(pk=item_id)
+            item = get_object_or_404(MenuItem, pk=item_id)
             OrderItem.objects.create(order=order, item=item)
-        
+
         # Redirect to a confirmation page or another view
         return redirect('order_confirmation', order_id=order.id)
 
-    return render(request, 'managementapp/menu_list.html', {'table': table, 'categories': categories})
-
-def food_detail(request, item_id):
-    return  render(request, 'managementapp/food_detail.html')
+    return render(request, 'managementapp/food_detail.html', {'menu_item': menu_item, 'table': table})
 
 @login_required
 def menu_items_api(request):

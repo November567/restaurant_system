@@ -1,6 +1,18 @@
+document.querySelector('.nav-button').addEventListener('click', function() {
+    document.querySelector('.nav-dropdown').classList.toggle('show');
+});
+
 document.addEventListener('DOMContentLoaded', function() {
     const navButtons = document.querySelectorAll('.nav-btn');
     const kdsMain = document.querySelector('.kds-main');
+
+    kdsMain.addEventListener('click', function(e) {
+        if (e.target.classList.contains('btn-secondary')) {
+            const card = e.target.closest('.order-card');
+            const orderId = card.querySelector('h2').textContent.replace('Order #', '');
+            window.location.href = `view_detail.html?id=${orderId}`;
+        }
+    }); // link to detail page
 
     // Navigation functionality
     navButtons.forEach(button => {
@@ -138,8 +150,4 @@ document.addEventListener('DOMContentLoaded', function() {
 
         return items;
     }
-});
-
-document.querySelector('.nav-button').addEventListener('click', function() {
-    document.querySelector('.nav-dropdown').classList.toggle('show');
-});  // for dropdown menu button
+})

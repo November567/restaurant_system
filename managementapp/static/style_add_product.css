@@ -25,10 +25,9 @@ body {
 
 .management-header h1 {
     color: #ff6347;
+    margin-bottom: 20px;
     font-size: 32px;
     text-align: center;
-    flex-grow: 1;
-    margin: 0;
 }
 
 .back-btn {

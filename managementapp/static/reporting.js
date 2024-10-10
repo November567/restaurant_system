@@ -190,3 +190,7 @@ function showSection(sectionId) {
     });
     document.getElementById(sectionId).classList.add('active');
 }
+
+document.querySelector('.nav-button').addEventListener('click', function() {
+    document.querySelector('.nav-dropdown').classList.toggle('show');
+}); // for dropdown menu button

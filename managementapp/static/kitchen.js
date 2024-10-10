@@ -139,3 +139,7 @@ document.addEventListener('DOMContentLoaded', function() {
         return items;
     }
 });
+
+document.querySelector('.nav-button').addEventListener('click', function() {
+    document.querySelector('.nav-dropdown').classList.toggle('show');
+});  // for dropdown menu button

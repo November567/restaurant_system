@@ -206,3 +206,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
 });
+
+document.querySelector('.nav-button').addEventListener('click', function() {
+    document.querySelector('.nav-dropdown').classList.toggle('show');
+}); // when click dropdown menu button

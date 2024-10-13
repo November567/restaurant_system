@@ -29,7 +29,7 @@ class MenuItem(models.Model):
 
 
 class OrderItem(models.Model):
-    order = models.ForeignKey('Order', on_delete=models.CASCADE)  # Foreign key to Order
+    order = models.ForeignKey('Order', on_delete=models.CASCADE) 
     menu_item = models.ForeignKey(MenuItem, on_delete=models.CASCADE)
     special_requests = models.TextField(null=True, blank=True)
     quantity = models.IntegerField(default=1)
@@ -45,7 +45,7 @@ class Order(models.Model):
     ]
 
     table = models.ForeignKey(Table, on_delete=models.CASCADE)
-    items = models.ManyToManyField(MenuItem, through=OrderItem)  # Using OrderItem as an intermediate model
+    items = models.ManyToManyField(MenuItem, through=OrderItem) 
     created_at = models.DateTimeField(auto_now_add=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="Pending")
 

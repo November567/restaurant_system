@@ -14,7 +14,7 @@ def menu_list(request, table_id, order_id=None):
     
     menu_items = MenuItem.objects.filter(available=True)
     categories = {
-        "Recommend": menu_items.filter(category="Recommend"),
+        "Recommend": menu_items.filter(recommend=True),
         "Food": menu_items.filter(category="Food"),
         "Appetizer": menu_items.filter(category="Appetizer"),
         "Drink": menu_items.filter(category="Drink"),
@@ -35,7 +35,6 @@ def menu_list(request, table_id, order_id=None):
 def food_order(request, item_id, table_id):
     menu_item = get_object_or_404(MenuItem, pk=item_id)
     table = get_object_or_404(Table, pk=table_id)
-    order, created = Order.objects.get_or_create(table=table, status="Pending")
 
     if request.method == "POST":
         quantity = int(request.POST.get("quantity", 1)) 
@@ -55,7 +54,7 @@ def food_order(request, item_id, table_id):
     return render(
         request,
         "managementapp/food_detail.html",
-        {"menu_item": menu_item, "table": table, "order": order},
+        {"menu_item": menu_item, "table": table},
     )
 
 

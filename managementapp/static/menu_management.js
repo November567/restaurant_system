@@ -134,7 +134,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Edit item functionality
     function editItem(itemId) {
-        window.location.href = `/edit_menu_item/${itemId}/`;
+        window.location.href = `/edit_product/${itemId}/`;
     }
 
     // Delete item functionality

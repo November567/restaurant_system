@@ -24,11 +24,13 @@
 
 <body>
     <div class="container">
+            <div class="item-header">
+                <button class="back-button" data-table-id="{{ table.id }}">
+                    <i class="fas fa-arrow-left"></i>
+                </button>
+            </div>
         <form method="POST">
             {% csrf_token %}
-            <div class="item-header">
-                <button class="back-button" onclick="window.history.back()"><i class="fas fa-arrow-left"></i></button>
-            </div>
 
             <div class="item-content">
                 <div class="item-price">{{ menu_item.name }} <br> {{ menu_item.price }} Baht</div>

@@ -1,5 +1,16 @@
 document.addEventListener('DOMContentLoaded', function () {
 
+    const basketBtn = document.querySelector('.basket-button');
+
+    basketBtn.addEventListener('click', function () {
+        const orderId = this.getAttribute('data-order-id');  // Retrieve the orderId from data attribute
+        navigateToBasket(orderId);  // Call the function with the orderId
+    });
+    
+    function navigateToBasket(orderId) {
+        window.location.href = `/payment/order/${orderId}/`;  // Redirect to the payment page
+    }
+
     // Smooth scrolling for navigation links
     document.querySelectorAll('nav a').forEach(anchor => {
         anchor.addEventListener('click', function (e) {
@@ -65,14 +76,19 @@ document.addEventListener('DOMContentLoaded', function () {
         button.addEventListener('click', function (event) {
             const menuItem = event.target.closest('.menu-item');  // Use 'event' to get the target
             const itemId = menuItem.dataset.itemId;  // Retrieve the item ID from data attribute
-            const table = menuItem.dataset.table;  // Retrieve the table from data attribute
+            const tableId = menuItem.dataset.tableId;  // Retrieve the table from data attribute
             const itemName = menuItem.querySelector('.menu-item-name').textContent;
             const itemPrice = menuItem.querySelector('.menu-item-price').textContent;
+
+            console.log('Item ID:', itemId);
+            console.log('Table ID:', tableId);
+            console.log('Item Name:', itemName);
+            console.log('Item Price:', itemPrice);
 
             console.log(`Added to cart: ${itemName} - ${itemPrice}`);
 
             // Navigate to the add-to-cart route including the table information
-            window.location.href = `/order/add/${itemId}/${table}/`;  // Include table in the URL
+            window.location.href = `/order/add/${itemId}/table/${tableId}/`;  // Include table in the URL
 
             // Visual feedback
             event.target.textContent = '✓';

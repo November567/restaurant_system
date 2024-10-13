@@ -4,10 +4,21 @@ document.addEventListener('DOMContentLoaded', function () {
     const minusBtn = document.querySelector('.quantity-btn.minus');
     const plusBtn = document.querySelector('.quantity-btn.plus');
     const addToCartBtn = document.querySelector('.add-to-cart');
+    const backBtn = document.querySelector('.back-button');
     const basePriceText = document.querySelector('#total-price').innerText;
-    const basePriceFloat = parseFloat(basePriceText.replace(/[^\d.-]/g, '')); // This will handle strings like "200.00"
+    const basePriceFloat = parseFloat(basePriceText.replace(/[^\d.-]/g, '')); // Handle strings like "200.00"
     const basePrice = Math.floor(basePriceFloat);
+    const form = addToCartBtn.closest('form'); // Get the form element
 
+    // Event listener for back button
+    backBtn.addEventListener('click', function () {
+        const tableId = this.getAttribute('data-table-id');  // Retrieve the tableId from data attribute
+        backEdit(tableId);
+    });
+
+    function backEdit(tableId) {
+        window.location.href = `/table/${tableId}/`;  // Redirect to the table page using the tableId
+    }
 
     // Size selection
     sizeOptions.forEach(option => {
@@ -28,34 +39,33 @@ document.addEventListener('DOMContentLoaded', function () {
         updateTotalPrice();
     }
 
+    
     function updateTotalPrice(sizePrice = 0) {
         const quantity = parseInt(quantityValue.textContent);
         const selectedSize = document.querySelector('.size-options input:checked');
         const sizePriceChange = parseInt(selectedSize.parentElement.querySelector('.price-change').textContent.replace('+', ''));
-        console.log(sizePriceChange + basePrice)
         const totalPrice = (basePrice + sizePriceChange) * quantity;
         addToCartBtn.textContent = `Add to Cart - ${totalPrice} Baht`;
     }
 
-    // Add to cart
-    addToCartBtn.addEventListener('click', function () {
+    // Submit the form when the "Add to Cart" button is clicked
+    form.addEventListener('submit', function (event) {
         const size = document.querySelector('.size-options input:checked').value;
         const quantity = parseInt(quantityValue.textContent);
         const note = document.querySelector('textarea').value;
 
-        // You would typically send this to a cart management function
-        console.log(`Added to cart: Papaya salad - Size: ${size}, Quantity: ${quantity}, Note: ${note}`);
+        // You can log or handle form data here if needed
+        console.log(`Submitting form: Size: ${size}, Quantity: ${quantity}, Note: ${note}`);
 
-        // Provide visual feedback
-        const originalText = this.textContent;
-        this.textContent = 'Added to Cart!';
-        this.disabled = true;
+        // You can also disable the button for a moment to avoid double submissions
+        addToCartBtn.disabled = true;
         setTimeout(() => {
-            this.textContent = originalText;
-            this.disabled = false;
+            addToCartBtn.disabled = false;
         }, 2000);
     });
 
     // Initialize total price
     updateTotalPrice();
+
+    
 });

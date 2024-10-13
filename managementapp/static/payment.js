@@ -5,7 +5,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const totalAmount = document.querySelector('.total-amount');
     const placeOrderBtn = document.querySelector('.place-order-btn');
     const paymentOptions = document.querySelectorAll('.payment-option input[type="radio"]');
-
+    
     // Quantity adjustment
     function updateQuantity(index, change) {
         let currentQuantity = parseInt(quantityElements[index].textContent);

@@ -4,20 +4,31 @@ document.addEventListener('DOMContentLoaded', function () {
     const minusBtn = document.querySelector('.quantity-btn.minus');
     const plusBtn = document.querySelector('.quantity-btn.plus');
     const addToCartBtn = document.querySelector('.add-to-cart');
-    const backBtn = document.querySelector('.back-button');
     const basePriceText = document.querySelector('#total-price').innerText;
     const basePriceFloat = parseFloat(basePriceText.replace(/[^\d.-]/g, '')); // Handle strings like "200.00"
     const basePrice = Math.floor(basePriceFloat);
     const form = addToCartBtn.closest('form'); // Get the form element
 
-    // Event listener for back button
+    const backBtn = document.querySelector('.back-button');
     backBtn.addEventListener('click', function () {
-        const tableId = this.getAttribute('data-table-id');  // Retrieve the tableId from data attribute
-        backEdit(tableId);
+        const tableId = this.getAttribute('data-table-id');
+        const orderId = this.getAttribute('data-order-id');
+    
+        if (orderId) {
+            // If orderId exists, redirect to the menu list with both table and order IDs
+            backEditOrder(tableId, orderId);
+        } else {
+            // If no orderId, redirect to the menu list with just the table ID
+            backEdit(tableId);
+        }
     });
-
+    
     function backEdit(tableId) {
-        window.location.href = `/table/${tableId}/`;  // Redirect to the table page using the tableId
+        window.location.href = `/table/${tableId}`;  // Redirect to menu list page
+    }
+    
+    function backEditOrder(tableId, orderId) {
+        window.location.href = `/table/${tableId}/order/${orderId}/`;  // Redirect to the menu list page with order ID
     }
 
     // Size selection

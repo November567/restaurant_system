@@ -3,17 +3,15 @@ from .models import Table, MenuItem, Order, Payment
 from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_http_methods
-from django.db.models import Sum, Count, Avg
 from django.shortcuts import render, get_object_or_404, redirect
 from .models import Table, MenuItem, Order, OrderItem
 from .forms import MenuItemForm
 import json
 
 
-def menu_list(request, table_id):
+def menu_list(request, table_id, order_id=None):
     table = get_object_or_404(Table, pk=table_id)
-
-    # Get all menu items and organize them by category
+    
     menu_items = MenuItem.objects.filter(available=True)
     categories = {
         "Recommend": menu_items.filter(category="Recommend"),
@@ -22,42 +20,42 @@ def menu_list(request, table_id):
         "Drink": menu_items.filter(category="Drink"),
         "Dessert": menu_items.filter(category="Dessert"),
     }
-
+    
+    current_order = None
+    if order_id:
+        current_order = get_object_or_404(Order, pk=order_id)
+    
     return render(
         request,
         "managementapp/menu_list.html",
-        {"table": table, "categories": categories},
+        {"table": table, "categories": categories, "current_order": current_order},
     )
 
 
 def food_order(request, item_id, table_id):
-    # Retrieve the menu item based on the provided item_id
     menu_item = get_object_or_404(MenuItem, pk=item_id)
     table = get_object_or_404(Table, pk=table_id)
+    order, created = Order.objects.get_or_create(table=table, status="Pending")
 
     if request.method == "POST":
-        # Get the quantity and special requests from the form
-        quantity = int(request.POST.get("quantity", 1))  # Default quantity is 1
+        quantity = int(request.POST.get("quantity", 1)) 
         special_requests = request.POST.get("special_requests", "")
 
-        # Create an OrderItem instance
-        order = Order.objects.create(table=table, status="Pending")
+        order, created = Order.objects.get_or_create(table=table, status="Pending")
 
-        # Create an OrderItem instance and associate it with the Order
         order_item = OrderItem.objects.create(
-            order=order,  # Associate OrderItem with the Order
+            order=order,  
             menu_item=menu_item,
             special_requests=special_requests,
             quantity=quantity,
-        )  # Associate the MenuItem with the Order through OrderItem
+        )  
 
-        # Redirect to a confirmation page or another view
-        return redirect("menu_list", table_id=table.id)
+        return redirect("menu_list", table_id=table.id, order_id=order.id)
 
     return render(
         request,
         "managementapp/food_detail.html",
-        {"menu_item": menu_item, "table": table},
+        {"menu_item": menu_item, "table": table, "order": order},
     )
 
 
@@ -81,9 +79,9 @@ def menu_items_api(request):
 
 @login_required
 def menu_management(request):
-    menu_items = MenuItem.objects.all()  # Fetch all menu items
+    menu_items = MenuItem.objects.all() 
     context = {
-        "menu_items": menu_items,  # Pass the menu items to the template
+        "menu_items": menu_items, 
     }
     return render(request, "managementapp/menu_management.html", context)
 
@@ -93,14 +91,13 @@ def add_product(request):
     if request.method == "POST":
         form = MenuItemForm(request.POST, request.FILES)
         if form.is_valid():
-            # ตรวจสอบว่ามีการอัปโหลดรูปภาพหรือไม่
-            if form.cleaned_data["image"]:  # ตรวจสอบว่ามีไฟล์หรือไม่
+            if form.cleaned_data["image"]: 
                 form.save()
-                return redirect("menu_management")  # เปลี่ยนเส้นทางหลังจากบันทึก
+                return redirect("menu_management") 
             else:
                 form.add_error(
                     "image", "Please upload an image."
-                )  # Redirect after saving
+                )
         else:
             print(form.errors)
     else:
@@ -140,16 +137,12 @@ def edit_product(request, item_id):
 @require_http_methods(["DELETE"])
 def delete_menu_item(request, item_id):
     try:
-        # Find the menu item by its ID
         menu_item = MenuItem.objects.get(pk=item_id)
-        # Delete the menu item
         menu_item.delete()
         return JsonResponse({"message": "Item deleted successfully"}, status=200)
     except MenuItem.DoesNotExist:
-        # If the item does not exist, return a 404 error
         return JsonResponse({"error": "Item not found"}, status=404)
     except Exception as e:
-        # Handle any other errors
         return JsonResponse({"error": str(e)}, status=500)
 
 
@@ -162,7 +155,7 @@ def update_menu_item_status(request, item_id):
         menu_item = MenuItem.objects.get(pk=item_id)
 
         if available is not None:
-            # Update the available field of the menu item
+
             menu_item.available = available
             menu_item.save()
 
@@ -206,16 +199,12 @@ def process_payment(request, order_id):
 
         return redirect('payment_confirmation')  # Redirect to a confirmation page after payment
 
-    return render(request, "managementapp/process_payment.html", {"order": order})
-
+    return render(request, "managementapp/payment.html", {"order": order})
 
 
 def generate_reports(request):
     # Generate reports and analytics
     return render(request, "managementapp/reports.html")
-
-
-# orders/views.py
 
 
 def update_order_status(request, order_id, new_status):

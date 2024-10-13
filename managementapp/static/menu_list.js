@@ -1,14 +1,20 @@
 document.addEventListener('DOMContentLoaded', function () {
 
     const basketBtn = document.querySelector('.basket-button');
+    if (basketBtn) {
+        basketBtn.addEventListener('click', function () {
+            const orderId = this.getAttribute('data-order-id');
+            console.log('Order ID:', orderId);
+            if (orderId) {
+                navigateToBasket(orderId);
+            } else {
+                console.error('No order ID found');
+            }
+        });
+    }
 
-    basketBtn.addEventListener('click', function () {
-        const orderId = this.getAttribute('data-order-id');  // Retrieve the orderId from data attribute
-        navigateToBasket(orderId);  // Call the function with the orderId
-    });
-    
     function navigateToBasket(orderId) {
-        window.location.href = `/payment/order/${orderId}/`;  // Redirect to the payment page
+        window.location.href = `/payment/order/${orderId}/`;
     }
 
     // Smooth scrolling for navigation links

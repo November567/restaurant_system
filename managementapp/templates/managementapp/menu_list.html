@@ -58,9 +58,11 @@
         </div>
     </main>
 
-    <button class="basket-button" data-order-id="{{ order.id }}">
+    <button class="basket-button" data-order-id="{{ current_order.id }}">
         <i class="fas fa-shopping-basket"></i>
-        <span class="item-count">{{ order.items.count }}</span>
+        {% if current_order and current_order.items.count > 0 %}
+            <span class="item-count">{{ current_order.items.count }}</span>
+        {% endif %}
     </button>
 
     <script src="{% static 'menu_list.js' %}"></script>

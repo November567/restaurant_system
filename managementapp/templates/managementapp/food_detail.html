@@ -25,7 +25,7 @@
 <body>
     <div class="container">
             <div class="item-header">
-                <button class="back-button" data-table-id="{{ table.id }}" data-order-id="{{ order.id }}">
+                <button class="back-button" data-table-id="{{ table.id }}" data-order-id="{{ current_order.id }}" data-payment="{% if is_payment_page %}'true'{% else %}'false'{% endif %}">
                     <i class="fas fa-arrow-left"></i>
                 </button>
             </div>
@@ -67,9 +67,9 @@
                     <button class="quantity-btn plus" type="button">+</button>
                 </div>
 
-                <button class="add-to-cart" onclick="addToCart('{{ menu_item.id }}', '{{ menu_item.price }}')">Add to
-                    Cart -
-                    <span id="total-price">{{ menu_item.price }}</span> Baht</button>
+                <button class="add-to-cart" onclick="addToCart('{{ menu_item.id }}', '{{ menu_item.price }}')">Add to Cart -
+                    <span id="total-price">{{ menu_item.price }}</span> Baht
+                </button>
             </div>
         </form>
     </div>

@@ -1,6 +1,8 @@
 from django.shortcuts import render, get_object_or_404
 from .models import Table, MenuItem, Order, Payment
 from django.http import JsonResponse
+from django.urls import reverse
+from django.db import transaction
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_http_methods
 from django.shortcuts import render, get_object_or_404, redirect
@@ -32,30 +34,81 @@ def menu_list(request, table_id, order_id=None):
     )
 
 
-def food_order(request, item_id, table_id):
-    menu_item = get_object_or_404(MenuItem, pk=item_id)
-    table = get_object_or_404(Table, pk=table_id)
+@require_http_methods(["GET", "POST"])
+def food_order(request, item_id, table_id, order_id=None, order_item_id=None):
+    try:
+        menu_item = get_object_or_404(MenuItem, pk=item_id)
+        table = get_object_or_404(Table, pk=table_id)
+        current_order = None
+        current_order_item = None
+        
+        if order_id:
+            current_order = get_object_or_404(Order, pk=order_id)
+        
+        if order_item_id:
+            current_order_item = get_object_or_404(OrderItem, pk=order_item_id)
 
-    if request.method == "POST":
-        quantity = int(request.POST.get("quantity", 1)) 
-        special_requests = request.POST.get("special_requests", "")
+        if request.method == "POST":
+            with transaction.atomic():
+                quantity = int(request.POST.get("quantity", 1))
+                special_requests = request.POST.get("special_requests", "")
+                total_price = request.POST.get('total_price', 0)
+                size = request.POST.get("size", "")
 
-        order, created = Order.objects.get_or_create(table=table, status="Pending")
+                order = current_order or Order.objects.create(table=table, status="Pending")
 
-        order_item = OrderItem.objects.create(
-            order=order,  
-            menu_item=menu_item,
-            special_requests=special_requests,
-            quantity=quantity,
-        )  
+                if current_order_item:
+                    current_order_item.quantity = quantity
+                    current_order_item.special_requests = special_requests
+                    current_order_item.size = size
+                    current_order_item.total_price = total_price 
+                    current_order_item.save()
+                else:
+                    OrderItem.objects.create(
+                        order=order,  
+                        menu_item=menu_item,
+                        special_requests=special_requests,
+                        quantity=quantity,
+                        size=size,
+                        total_price = total_price 
+                    )
 
-        return redirect("menu_list", table_id=table.id, order_id=order.id)
+                from_payment = request.POST.get('from_payment', 'false')
+                
+                if from_payment == 'true':
+                    redirect_url = reverse('payment_page', kwargs={'order_id': order.id})
+                else:
+                    redirect_url = reverse('menu_list', kwargs={'table_id': table.id, 'order_id': order.id})
 
-    return render(
-        request,
-        "managementapp/food_detail.html",
-        {"menu_item": menu_item, "table": table},
-    )
+                return JsonResponse({
+                    'success': True,
+                    'redirect_url': redirect_url
+                })
+
+        # For GET requests
+        from_payment = request.GET.get('from_payment', 'false')
+
+        return render(
+            request,
+            "managementapp/food_detail.html",
+            {
+                "menu_item": menu_item, 
+                "table": table, 
+                "current_order": current_order, 
+                "current_order_item": current_order_item, 
+                "from_payment": from_payment
+            }
+        )
+    except Exception as e:
+        # Log the error for debugging
+        import logging
+        logging.error(f"Error in food_order view: {str(e)}")
+        
+        # Return a JSON response with error details
+        return JsonResponse({
+            'success': False,
+            'error': str(e)
+        }, status=500)
 
 
 @login_required
@@ -179,6 +232,7 @@ def kitchen_display(request):
 
 def process_payment(request, order_id):
     order = get_object_or_404(Order, pk=order_id)
+    table = order.table
 
     if request.method == "POST":
         # Example: Handle the payment (you might want to integrate a payment gateway)
@@ -198,7 +252,7 @@ def process_payment(request, order_id):
 
         return redirect('payment_confirmation')  # Redirect to a confirmation page after payment
 
-    return render(request, "managementapp/payment.html", {"order": order})
+    return render(request, "managementapp/payment.html", {"order": order, "table": table})
 
 
 def generate_reports(request):

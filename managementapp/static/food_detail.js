@@ -13,22 +13,28 @@ document.addEventListener('DOMContentLoaded', function () {
     backBtn.addEventListener('click', function () {
         const tableId = this.getAttribute('data-table-id');
         const orderId = this.getAttribute('data-order-id');
-    
-        if (orderId) {
-            // If orderId exists, redirect to the menu list with both table and order IDs
+        const fromPayment = sessionStorage.getItem('fromPayment');
+
+        if (fromPayment === 'true') {
+            backEditInpayment(orderId);
+            sessionStorage.removeItem('fromPayment');
+        } else if (orderId) {
             backEditOrder(tableId, orderId);
         } else {
-            // If no orderId, redirect to the menu list with just the table ID
             backEdit(tableId);
         }
     });
-    
+
     function backEdit(tableId) {
         window.location.href = `/table/${tableId}`;  // Redirect to menu list page
     }
-    
+
     function backEditOrder(tableId, orderId) {
         window.location.href = `/table/${tableId}/order/${orderId}/`;  // Redirect to the menu list page with order ID
+    }
+
+    function backEditInpayment(orderId) {
+        window.location.href = `/payment/order/${orderId}/`;  // Redirect to the payment page
     }
 
     // Size selection
@@ -50,33 +56,64 @@ document.addEventListener('DOMContentLoaded', function () {
         updateTotalPrice();
     }
 
-    
+
     function updateTotalPrice(sizePrice = 0) {
         const quantity = parseInt(quantityValue.textContent);
         const selectedSize = document.querySelector('.size-options input:checked');
         const sizePriceChange = parseInt(selectedSize.parentElement.querySelector('.price-change').textContent.replace('+', ''));
         const totalPrice = (basePrice + sizePriceChange) * quantity;
         addToCartBtn.textContent = `Add to Cart - ${totalPrice} Baht`;
+        return totalPrice;
     }
 
     // Submit the form when the "Add to Cart" button is clicked
     form.addEventListener('submit', function (event) {
+        event.preventDefault();
+
         const size = document.querySelector('.size-options input:checked').value;
         const quantity = parseInt(quantityValue.textContent);
         const note = document.querySelector('textarea').value;
 
-        // You can log or handle form data here if needed
         console.log(`Submitting form: Size: ${size}, Quantity: ${quantity}, Note: ${note}`);
 
-        // You can also disable the button for a moment to avoid double submissions
         addToCartBtn.disabled = true;
-        setTimeout(() => {
-            addToCartBtn.disabled = false;
-        }, 2000);
+
+        const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+        const formData = new FormData(form);
+        const totalPrice = updateTotalPrice();
+        formData.append('size', size);
+        formData.append('quantity', quantity);
+        formData.append('special_requests', note);
+        formData.append('total_price', totalPrice);
+        formData.append('from_payment', sessionStorage.getItem('fromPayment') || 'false');
+
+        fetch(form.action, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRFToken': csrftoken
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                window.location.href = data.redirect_url;
+            } else {
+                console.error('Form submission failed:', data.error);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        })
+        .finally(() => {
+            setTimeout(() => {
+                addToCartBtn.disabled = false;
+            }, 2000);
+        });
     });
 
     // Initialize total price
     updateTotalPrice();
 
-    
+
 });

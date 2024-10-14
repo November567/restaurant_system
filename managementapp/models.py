@@ -33,9 +33,11 @@ class OrderItem(models.Model):
     menu_item = models.ForeignKey(MenuItem, on_delete=models.CASCADE)
     special_requests = models.TextField(null=True, blank=True)
     quantity = models.IntegerField(default=1)
+    size = models.CharField(max_length=50, blank=True)
+    total_price = models.DecimalField(max_digits=6, decimal_places=2)
 
     def __str__(self):
-        return f"{self.quantity} x {self.menu_item.name}"
+        return f"{self.quantity} x {self.menu_item.name} (${self.total_price})"
 
 class Order(models.Model):
     STATUS_CHOICES = [

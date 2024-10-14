@@ -6,9 +6,11 @@ from . import views
 urlpatterns = [
     path('table/<int:table_id>/', views.menu_list, name='menu_list'),
     path('table/<int:table_id>/order/<int:order_id>/', views.menu_list, name='menu_list'),
+    path('table/<int:table_id>/menu_item/<int:item_id>/', views.food_order, name='food_detail'),
+    path('table/<int:table_id>/menu_item/<int:item_id>/order/<int:order_id>/', views.food_order, name='food_detail'),
+    path('table/<int:table_id>/menu_item/<int:item_id>/order/<int:order_id>/order_id/<int:order_item_id>/', views.food_order, name='food_detail'),
     path('edit_product/<int:item_id>/', views.edit_product, name='edit_product'),
     path('menu_management/', views.menu_management, name='menu_management'),
-    path('order/add/<int:item_id>/table/<int:table_id>/', views.food_order, name='food_detail'),
     path('add_product/', views.add_product, name='add_product'),
     path('payment/order/<int:order_id>/', views.process_payment, name='process_payment'),
     path('kitchen/', views.kitchen_display, name='kitchen_display'),

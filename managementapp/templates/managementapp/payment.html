@@ -28,15 +28,15 @@
                     </div>
                     <div class="item-details">
                         <h2>{{ item.menu_item.name }}</h2>
-                        <p>Size {{ item.menu_item.size }}</p>
-                        <a href="{% url 'food_detail' item_id=item.menu_item.id table_id=order.table.id %}" class="edit-link">Edit</a>
+                        <p>Size {{ item.size }}</p>
+                        <a href="#" class="edit-link" data-table-id="{{ table.id }}" data-order-id="{{ order.id }}" data-item-id="{{ item.menu_item.id }}" data-order-item-id="{{ item.id }}">Edit</a>
                     </div>
                     <div class="item-quantity">
                         <button class="quantity-btn minus" data-item-id="{{ item.id }}"><i class="fas fa-minus"></i></button>
                         <span class="quantity">{{ item.quantity }}</span>
                         <button class="quantity-btn plus" data-item-id="{{ item.id }}"><i class="fas fa-plus"></i></button>
                     </div>
-                    <div class="item-price">{{ item.menu_item.price }} ฿</div>
+                    <div class="item-price">{{ item.total_price }} ฿</div>
                 </div>
                 {% endfor %}
             </section>

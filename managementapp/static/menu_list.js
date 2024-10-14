@@ -80,29 +80,26 @@ document.addEventListener('DOMContentLoaded', function () {
     const addButtons = document.querySelectorAll('.add-button');
     addButtons.forEach(button => {
         button.addEventListener('click', function (event) {
-            const menuItem = event.target.closest('.menu-item');  // Use 'event' to get the target
-            const itemId = menuItem.dataset.itemId;  // Retrieve the item ID from data attribute
-            const tableId = menuItem.dataset.tableId;  // Retrieve the table from data attribute
-            const itemName = menuItem.querySelector('.menu-item-name').textContent;
-            const itemPrice = menuItem.querySelector('.menu-item-price').textContent;
+            const menuItem = event.target.closest('.menu-item'); 
+            const itemId = menuItem.dataset.itemId;  
+            const tableId = menuItem.dataset.tableId;  
 
-            console.log('Item ID:', itemId);
-            console.log('Table ID:', tableId);
-            console.log('Item Name:', itemName);
-            console.log('Item Price:', itemPrice);
+            const currentPath = window.location.pathname;
+            let orderId = null;
 
-            console.log(`Added to cart: ${itemName} - ${itemPrice}`);
+            const match = currentPath.match(/\/order\/(\d+)\//);
+            if (match) {
+                orderId = match[1];  
+            }
 
-            // Navigate to the add-to-cart route including the table information
-            window.location.href = `/order/add/${itemId}/table/${tableId}/`;  // Include table in the URL
+            let url;
+            if (orderId) {
+                url = `/table/${tableId}/menu_item/${itemId}/order/${orderId}/`;
+            } else {
+                url = `/table/${tableId}/menu_item/${itemId}/`;
+            }
 
-            // Visual feedback
-            event.target.textContent = '✓';
-            event.target.style.backgroundColor = '#4CAF50';
-            setTimeout(() => {
-                event.target.textContent = '+';
-                event.target.style.backgroundColor = '#ff6347';
-            }, 1000);
+            window.location.href = url;
         });
     });
 

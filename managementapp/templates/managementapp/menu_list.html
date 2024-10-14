@@ -35,7 +35,7 @@
                 <div class="menu-grid">
                     <div class="menu-list">
                         {% for item in items %}
-                        <div class="menu-item" data-item-id="{{ item.id }}" data-table-id="{{ table.id }}">
+                        <div class="menu-item" data-item-id="{{ item.id }}" data-table-id="{{ table.id }}" >
                             <div class="menu-item-image">
                                 {% if item.image %}
                                 <img src="{{ item.image.url }}" alt="{{ item.name }}">

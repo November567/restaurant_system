@@ -31,11 +31,7 @@
                         <p>Size {{ item.size }}</p>
                         <a href="#" class="edit-link" data-table-id="{{ table.id }}" data-order-id="{{ order.id }}" data-item-id="{{ item.menu_item.id }}" data-order-item-id="{{ item.id }}">Edit</a>
                     </div>
-                    <div class="item-quantity">
-                        <button class="quantity-btn minus" data-item-id="{{ item.id }}"><i class="fas fa-minus"></i></button>
-                        <span class="quantity">{{ item.quantity }}</span>
-                        <button class="quantity-btn plus" data-item-id="{{ item.id }}"><i class="fas fa-plus"></i></button>
-                    </div>
+                    <div class="quantity">{{ item.quantity }}x</div>
                     <div class="item-price">{{ item.total_price }} ฿</div>
                 </div>
                 {% endfor %}

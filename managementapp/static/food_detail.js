@@ -37,6 +37,20 @@ document.addEventListener('DOMContentLoaded', function () {
         window.location.href = `/payment/order/${orderId}/`;  // Redirect to the payment page
     }
 
+    addToCartBtn.addEventListener('click', function () {
+        const orderId = this.getAttribute('data-order-id');
+        const tableId = this.getAttribute('data-table-id');
+        const fromPayment = sessionStorage.getItem('fromPayment');
+        console.log(orderId)
+
+        if (fromPayment === 'true') {
+            backEditInpayment(orderId);
+            sessionStorage.removeItem('fromPayment');
+        } else{
+            backEdit(tableId);
+        } 
+    });
+
     // Size selection
     sizeOptions.forEach(option => {
         option.addEventListener('change', function () {
@@ -73,6 +87,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const size = document.querySelector('.size-options input:checked').value;
         const quantity = parseInt(quantityValue.textContent);
         const note = document.querySelector('textarea').value;
+        const fromPayment = sessionStorage.getItem('fromPayment') || 'false';
 
         console.log(`Submitting form: Size: ${size}, Quantity: ${quantity}, Note: ${note}`);
 
@@ -85,7 +100,7 @@ document.addEventListener('DOMContentLoaded', function () {
         formData.append('quantity', quantity);
         formData.append('special_requests', note);
         formData.append('total_price', totalPrice);
-        formData.append('from_payment', sessionStorage.getItem('fromPayment') || 'false');
+        formData.append('from_payment', fromPayment);
 
         fetch(form.action, {
             method: 'POST',
@@ -97,7 +112,11 @@ document.addEventListener('DOMContentLoaded', function () {
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                window.location.href = data.redirect_url;
+                if (fromPayment === 'true') {
+                    window.location.href = `/payment/order/${orderId}/`; // Redirect to payment if from payment
+                } else {
+                    window.location.href = data.redirect_url; // Redirect to normal route
+                }
             } else {
                 console.error('Form submission failed:', data.error);
             }

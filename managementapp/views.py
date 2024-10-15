@@ -1,11 +1,10 @@
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
 from .models import Table, MenuItem, Order, Payment
 from django.http import JsonResponse
 from django.urls import reverse
 from django.db import transaction
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_http_methods
-from django.shortcuts import render, get_object_or_404, redirect
 from .models import Table, MenuItem, Order, OrderItem
 from .forms import MenuItemForm
 import json
@@ -74,6 +73,7 @@ def food_order(request, item_id, table_id, order_id=None, order_item_id=None):
                     )
 
                 from_payment = request.POST.get('from_payment', 'false')
+                print(from_payment)
                 
                 if from_payment == 'true':
                     redirect_url = reverse('payment_page', kwargs={'order_id': order.id})
@@ -85,7 +85,6 @@ def food_order(request, item_id, table_id, order_id=None, order_item_id=None):
                     'redirect_url': redirect_url
                 })
 
-        # For GET requests
         from_payment = request.GET.get('from_payment', 'false')
 
         return render(
@@ -96,7 +95,10 @@ def food_order(request, item_id, table_id, order_id=None, order_item_id=None):
                 "table": table, 
                 "current_order": current_order, 
                 "current_order_item": current_order_item, 
-                "from_payment": from_payment
+                "from_payment": from_payment,
+                "quantity": current_order_item.quantity if current_order_item else 1, 
+                "special_requests": current_order_item.special_requests if current_order_item else "", 
+                "size": current_order_item.size if current_order_item else "S",  
             }
         )
     except Exception as e:

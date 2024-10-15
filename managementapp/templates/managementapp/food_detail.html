@@ -39,17 +39,17 @@
                     <h2>Size</h2>
                     <div class="size-options">
                         <label class="size-option">
-                            <input type="radio" name="size" value="S" checked>
+                            <input type="radio" name="size" value="S" {% if size == 'S' %}checked{% endif %}>
                             <span>S</span>
                             <span class="price-change">+0</span>
                         </label>
                         <label class="size-option">
-                            <input type="radio" name="size" value="M">
+                            <input type="radio" name="size" value="M" {% if size == 'M' %}checked{% endif %}>
                             <span>M</span>
                             <span class="price-change">+20</span>
                         </label>
                         <label class="size-option">
-                            <input type="radio" name="size" value="L">
+                            <input type="radio" name="size" value="L" {% if size == 'L' %}checked{% endif %}>
                             <span>L</span>
                             <span class="price-change">+40</span>
                         </label>
@@ -58,16 +58,16 @@
 
                 <div class="section note-section">
                     <h2>Note to restaurant</h2>
-                    <textarea id="special_requests" name = "special_requests" placeholder="Add your special instructions here..."></textarea>
+                    <textarea id="special_requests" name="special_requests" placeholder="Add your special instructions here...">{{ special_requests }}</textarea> <!-- Pre-filled special requests -->
                 </div>
 
                 <div class="section quantity-section">
                     <button class="quantity-btn minus" type="button">-</button>
-                    <span class="quantity">1</span>
+                    <span class="quantity">{{ quantity }}</span> 
                     <button class="quantity-btn plus" type="button">+</button>
                 </div>
 
-                <button class="add-to-cart" onclick="addToCart('{{ menu_item.id }}', '{{ menu_item.price }}')">Add to Cart -
+                <button class="add-to-cart" data-table-id="{{ table.id }}" data-order-id="{{ current_order.id }}" data-payment="{% if is_payment_page %}'true'{% else %}'false'{% endif %}">Add to Cart -
                     <span id="total-price">{{ menu_item.price }}</span> Baht
                 </button>
             </div>

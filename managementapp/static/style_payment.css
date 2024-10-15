@@ -102,37 +102,19 @@ body {
     text-decoration: none;
 }
 
-.item-quantity {
-    display: flex;
-    align-items: center;
-    margin-top: 10px;
-}
-
-.quantity-btn {
-    background-color: #f0f0f0;
-    border: none;
-    width: 30px;
-    height: 30px;
-    border-radius: 50%;
-    font-size: 14px;
-    cursor: pointer;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
 .quantity {
-    margin: 0 10px;
-    font-size: 14px;
-    min-width: 20px;
-    text-align: center;
+    font-weight: 600;
+    font-size: 18px; /* Increased font size for better readability */
+    color: #333;
+    margin-top: 10px;
+    width: 40px; /* Set a width to align the quantity value properly */
 }
 
 .item-price {
     font-weight: 600;
-    font-size: 16px;
+    font-size: 18px; /* Increased font size for consistency with quantity */
     color: #333;
-    margin-top: 9.8px;
+    margin-top: 10px; /* Rounded margin for a cleaner look */
 }
 
 .payment-methods {

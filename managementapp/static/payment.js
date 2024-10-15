@@ -1,36 +1,15 @@
 document.addEventListener('DOMContentLoaded', function () {
-    const quantityElements = document.querySelectorAll('.quantity');
-    const minusBtns = document.querySelectorAll('.quantity-btn.minus');
-    const plusBtns = document.querySelectorAll('.quantity-btn.plus');
     const totalAmount = document.querySelector('.total-amount');
     const placeOrderBtn = document.querySelector('.place-order-btn');
     const paymentOptions = document.querySelectorAll('.payment-option input[type="radio"]');
 
-    // Quantity adjustment
-    function updateQuantity(index, change) {
-        let currentQuantity = parseInt(quantityElements[index].textContent);
-        currentQuantity = Math.max(1, currentQuantity + change);
-        quantityElements[index].textContent = currentQuantity;
-        updateTotalPrice();
-    }
-
-    minusBtns.forEach((btn, index) => {
-        btn.addEventListener('click', () => updateQuantity(index, -1));
+    let total = 0;
+    document.querySelectorAll('.order-item').forEach(item => {
+        const price = parseInt(item.querySelector('.item-price').textContent);
+        total += price;
     });
-
-    plusBtns.forEach((btn, index) => {
-        btn.addEventListener('click', () => updateQuantity(index, 1));
-    });
-
-    function updateTotalPrice() {
-        let total = 0;
-        document.querySelectorAll('.order-item').forEach(item => {
-            const price = parseInt(item.querySelector('.item-price').textContent);
-            const quantity = parseInt(item.querySelector('.quantity').textContent);
-            total += price * quantity;
-        });
-        totalAmount.textContent = `${total} ฿`;
-    }
+    totalAmount.textContent = `${total} ฿`;
+    
 
     // Payment method selection
     paymentOptions.forEach(option => {
@@ -73,9 +52,6 @@ document.addEventListener('DOMContentLoaded', function () {
             // Here you would typically redirect to an order confirmation page
         }, 2000);
     });
-
-    // Initialize total price
-    updateTotalPrice();
 
     const editLinks = document.querySelectorAll('.edit-link');
     editLinks.forEach(link => {

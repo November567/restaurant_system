@@ -54,7 +54,7 @@ def food_order(request, item_id, table_id, order_id=None, order_item_id=None):
                 total_price = request.POST.get('total_price', 0)
                 size = request.POST.get("size", "")
 
-                order = current_order or Order.objects.create(table=table, status="Pending")
+                order = current_order or Order.objects.create(table=table, status="Paying")
 
                 if current_order_item:
                     current_order_item.quantity = quantity
@@ -73,7 +73,6 @@ def food_order(request, item_id, table_id, order_id=None, order_item_id=None):
                     )
 
                 from_payment = request.POST.get('from_payment', 'false')
-                print(from_payment)
                 
                 if from_payment == 'true':
                     redirect_url = reverse('payment_page', kwargs={'order_id': order.id})
@@ -111,7 +110,6 @@ def food_order(request, item_id, table_id, order_id=None, order_item_id=None):
             'success': False,
             'error': str(e)
         }, status=500)
-
 
 @login_required
 def menu_items_api(request):
@@ -234,12 +232,10 @@ def kitchen_display(request):
 
 def process_payment(request, order_id):
     order = get_object_or_404(Order, pk=order_id)
-    table = order.table
-
     if request.method == "POST":
         # Example: Handle the payment (you might want to integrate a payment gateway)
         payment_method = request.POST.get('payment_method')  # Assume this is passed from the form
-        amount = sum(item.menu_item.price * item.quantity for item in order.orderitem_set.all())
+        amount = sum(item.total_price for item in order.orderitem_set.all())
 
         # Create a payment record
         Payment.objects.create(
@@ -249,12 +245,12 @@ def process_payment(request, order_id):
         )
 
         # Update order status
-        order.status = 'Completed'
+        order.status = 'Pending'
         order.save()
 
-        return redirect('payment_confirmation')  # Redirect to a confirmation page after payment
+        return redirect('menu_list', table_id=order.table.id)  # Redirect to a confirmation page after payment
 
-    return render(request, "managementapp/payment.html", {"order": order, "table": table})
+    return render(request, "managementapp/payment.html", {"order": order})
 
 
 def generate_reports(request):

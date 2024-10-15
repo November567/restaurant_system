@@ -37,20 +37,6 @@ document.addEventListener('DOMContentLoaded', function () {
         window.location.href = `/payment/order/${orderId}/`;  // Redirect to the payment page
     }
 
-    addToCartBtn.addEventListener('click', function () {
-        const orderId = this.getAttribute('data-order-id');
-        const tableId = this.getAttribute('data-table-id');
-        const fromPayment = sessionStorage.getItem('fromPayment');
-        console.log(orderId)
-
-        if (fromPayment === 'true') {
-            backEditInpayment(orderId);
-            sessionStorage.removeItem('fromPayment');
-        } else{
-            backEdit(tableId);
-        } 
-    });
-
     // Size selection
     sizeOptions.forEach(option => {
         option.addEventListener('change', function () {

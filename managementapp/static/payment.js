@@ -19,40 +19,6 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 
-    // Place order
-    placeOrderBtn.addEventListener('click', function () {
-        const selectedPayment = document.querySelector('.payment-option input[type="radio"]:checked');
-        if (!selectedPayment) {
-            alert('Please select a payment method');
-            return;
-        }
-
-        const orderItems = Array.from(document.querySelectorAll('.order-item')).map(item => ({
-            name: item.querySelector('h2').textContent,
-            quantity: item.querySelector('.quantity').textContent,
-            price: item.querySelector('.item-price').textContent
-        }));
-
-        const orderDetails = {
-            items: orderItems,
-            total: totalAmount.textContent,
-            paymentMethod: selectedPayment.parentElement.querySelector('label').textContent.trim()
-        };
-
-        // You would typically send this to a server to process the order
-        console.log('Order placed:', orderDetails);
-
-        // Simulating order placement
-        this.textContent = 'Processing...';
-        this.disabled = true;
-        setTimeout(() => {
-            alert('Order placed successfully!');
-            this.textContent = 'Place Order';
-            this.disabled = false;
-            // Here you would typically redirect to an order confirmation page
-        }, 2000);
-    });
-
     const editLinks = document.querySelectorAll('.edit-link');
     editLinks.forEach(link => {
         link.addEventListener('click', function (event) {

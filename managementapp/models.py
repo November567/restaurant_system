@@ -41,6 +41,7 @@ class OrderItem(models.Model):
 
 class Order(models.Model):
     STATUS_CHOICES = [
+        ('Paying', 'Paying'),
         ('Pending', 'Pending'), 
         ('In Progress', 'In Progress'),
         ('Completed', 'Completed'),
@@ -49,7 +50,7 @@ class Order(models.Model):
     table = models.ForeignKey(Table, on_delete=models.CASCADE)
     items = models.ManyToManyField(MenuItem, through=OrderItem) 
     created_at = models.DateTimeField(auto_now_add=True)
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="Pending")
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="Paying")
 
     def __str__(self):
         return f"Order {self.id} for Table {self.table.number} - {self.status}"

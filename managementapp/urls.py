@@ -19,5 +19,6 @@ urlpatterns = [
     path('api/menu_items/', views.menu_items_api, name='menu_items_api'),
     path('api/menu_items/<int:item_id>/delete/', views.delete_menu_item, name='delete_menu_item'),
     path('api/menu_items/<int:item_id>/update/', views.update_menu_item_status, name='update_menu_item_status'),
+    path('get-order-details/<int:order_id>/', views.get_order_details, name='get_order_details'),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 

@@ -9,31 +9,52 @@
     <script src="https://kit.fontawesome.com/your-fontawesome-kit.js" crossorigin="anonymous"></script>
 </head>
 <body>
+    {% csrf_token %}
     <div class="container kds-container">
         <header class="kds-header">
             <h1>Kitchen Display System</h1>
-            
-            <div class="nav-button-container">
-                <button class="nav-button">
-                    <i class="fas fa-bars"></i>
-                </button>
-                <div class="nav-dropdown">
-                    <a href="menu_management.html">Menu Management</a>
-                    <a href="reporting.html">Reporting</a>
-                </div>
-            </div>
-
             <nav class="kds-nav">
-                <button class="nav-btn active" data-status="all">All Orders</button>
-                <button class="nav-btn" data-status="in-progress">In Progress</button>
-                <button class="nav-btn" data-status="completed">Completed</button>
+                <button class="nav-btn all-orders active">All Orders</button>
+                <button class="nav-btn in-progress">In Progress</button>
+                <button class="nav-btn completed">Completed</button>
             </nav>
         </header>
-
+        
         <main class="kds-main" role="main">
-            <!-- Order cards will be dynamically inserted here -->
+            <div class="order-grid">
+                {% for status, orders in orders.items %}
+                    {% if orders %}
+                        {% for order in orders %}
+                            <div class="order-card {{ status }}" data-id="{{ order.id }}">
+                                <div class="order-header">
+                                    <h2>Order #{{ order.id }}</h2>
+                                    <span class="order-time">{{ order.created_at|date:"H:i" }}</span>
+                                </div>
+                                <p>Table #{{ order.table.id }}</p>
+                                <ul class="order-items">
+                                    {% for item in order.orderitem_set.all %}
+                                        <li>
+                                            <span class="item-name">{{ item.menu_item.name }}</span>
+                                            <span class="item-quantity">x{{ item.quantity }}</span>
+                                        </li>
+                                    {% endfor %}
+                                </ul>
+                                <div class="order-actions">
+                                    {% if status != 'completed' %}
+                                        <button class="btn btn-primary"><i class="fas fa-check"></i> Complete</button>
+                                    {% endif %}
+                                    <button class="btn btn-secondary"><i class="fas fa-eye"></i> View Details</button>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                {% endfor %}
+            </div>
         </main>
     </div>
-    <script src="{% static 'kitchen.js' }"></script>
+    <div class="completed-orders" style="display: none;">
+        <!-- Completed orders will be moved here -->
+    </div>
+    <script src="{% static 'kitchen.js' %}"></script>
 </body>
 </html>

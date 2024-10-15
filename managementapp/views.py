@@ -5,6 +5,7 @@ from django.urls import reverse
 from django.db import transaction
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_http_methods
+from django.views.decorators.http import require_POST
 from .models import Table, MenuItem, Order, OrderItem
 from .forms import MenuItemForm
 import json
@@ -226,9 +227,47 @@ def update_menu_item_status(request, item_id):
 
 @login_required
 def kitchen_display(request):
-    orders = Order.objects.filter(status="Pending")
+    if request.method == "POST":
+        order_id = request.POST.get('order_id')
+        action = request.POST.get('action')
+
+        if action == 'complete':
+            try:
+                order = Order.objects.get(id=order_id)
+                order.status = "Completed"
+                order.save()
+                return JsonResponse({'success': True})
+            except Order.DoesNotExist:
+                return JsonResponse({'success': False, 'error': 'Order not found'}, status=404)
+            except Exception as e:
+                return JsonResponse({'success': False, 'error': str(e)}, status=500)
+        else:
+            return JsonResponse({'success': False, 'error': 'Invalid action'}, status=400)
+
+    # GET request handling
+    orders = {
+        'pending': Order.objects.filter(status="Pending"),
+        'in_progress': Order.objects.filter(status="In Progress"),
+        'completed': Order.objects.filter(status="Completed"),
+    }
     return render(request, "managementapp/kitchen.html", {"orders": orders})
 
+def get_order_details(request, order_id):
+    try:
+        order = Order.objects.get(id=order_id)
+        data = {
+            "id": order.id,
+            "table": order.table.id,
+            "status": order.status,
+            "created_at": order.created_at.strftime("%Y-%m-%d %H:%M:%S"),
+            "items": [
+                {"name": item.menu_item.name, "quantity": item.quantity}
+                for item in order.orderitem_set.all()
+            ]
+        }
+        return JsonResponse(data)
+    except Order.DoesNotExist:
+        return JsonResponse({"error": "Order not found"}, status=404)
 
 def process_payment(request, order_id):
     order = get_object_or_404(Order, pk=order_id)

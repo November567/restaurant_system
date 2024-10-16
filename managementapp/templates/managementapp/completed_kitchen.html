@@ -9,8 +9,10 @@
     {% block title %}
     <title>Kitchen Display System - Completed Orders</title>
     {% endblock %}
+    {% block css %}
     <link rel="stylesheet" href="{% static 'style_kitchen.css' %}">
     <script src="https://kit.fontawesome.com/your-fontawesome-kit.js" crossorigin="anonymous"></script>
+    {% endblock %}
 </head>
 
 <body>
@@ -51,9 +53,9 @@
                 </div>
             </main>
         </div>
+        <script src="{% static 'kitchen.js' %}"></script>
         {% endblock %}
     </div>
-    <script src="{% static 'kitchen.js' %}"></script>
 </body>
 
 </html>

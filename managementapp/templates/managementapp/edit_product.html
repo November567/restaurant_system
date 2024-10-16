@@ -1,78 +1,89 @@
-{% extends "managementapp/dashboard.html" %}
+{% extends "managementapp/kitchen.html" %}
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    {% block title %}
     <title>Edit Product - Restaurant Management System</title>
+    {% endblock %}
+    {% block css %}
     <link rel="stylesheet" href="{% static 'style_edit_product.css' %}">
+    {% endblock %}
 </head>
-<body>
-    <div class="container edit-product">
-        <div class="management-header">
-            <button class="back-btn">
-                <i class="fas fa-arrow-left"></i> Back to Menu Management
-            </button>
 
-            {% if form.errors %}
+<body>
+    <div class="content">
+        {% block content %}
+        <div class="container edit-product">
+            <div class="management-header">
+                <button class="back-btn">
+                    <i class="fas fa-arrow-left"></i> Back to Menu Management
+                </button>
+
+                {% if form.errors %}
                 <div class="form-errors">
                     <ul>
                         {% for field in form %}
-                            {% for error in field.errors %}
-                                <li>{{ error }}</li>
-                            {% endfor %}
+                        {% for error in field.errors %}
+                        <li>{{ error }}</li>
+                        {% endfor %}
                         {% endfor %}
                     </ul>
                 </div>
-            {% endif %}
-            
-            <h1>Edit Product</h1>
-            <div class="placeholder"></div>
-        </div>
-        <form id="edit-product-form" class="product-form" method="POST" enctype="multipart/form-data">
-            {% csrf_token %}
-            <div class="form-group">
-                <label for="product-name">Product Name</label>
-                {{ form.name }}
+                {% endif %}
+
+                <h1>Edit Product</h1>
+                <div class="placeholder"></div>
             </div>
-            <div class="form-group">
-                <label for="product-price">Price (฿)</label>
-                {{ form.price }}
-            </div>
-            <div class="form-group">
-                <label for="product-category">Category</label>
-                {{ form.category }}
-            </div>
-            <div class="form-group">
-                <label for="product-recommend">Recommend</label>
-                {{ form.recommend }}
-            </div>
-            <div class="form-group">
-                <label for="product-description">Description</label>
-                {{ form.description }}
-            </div>
-            <div class="form-group">
-                <label for="product-image">Product Image</label>
-            
-                {% if form.image.value %}
+            <form id="edit-product-form" class="product-form" method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="product-name">Product Name</label>
+                    {{ form.name }}
+                </div>
+                <div class="form-group">
+                    <label for="product-price">Price (฿)</label>
+                    {{ form.price }}
+                </div>
+                <div class="form-group">
+                    <label for="product-category">Category</label>
+                    {{ form.category }}
+                </div>
+                <div class="form-group">
+                    <label for="product-recommend">Recommend</label>
+                    {{ form.recommend }}
+                </div>
+                <div class="form-group">
+                    <label for="product-description">Description</label>
+                    {{ form.description }}
+                </div>
+                <div class="form-group">
+                    <label for="product-image">Product Image</label>
+
+                    {% if form.image.value %}
                     <div class="current-image">
                         <p>Current Image:</p>
                         <img src="{{ form.image.value.url }}" alt="Current product image" class="product-image-preview">
                     </div>
-                {% endif %}
-            
-                <div class="custom-file-input">
-                    {{ form.image }}
+                    {% endif %}
+
+                    <div class="custom-file-input">
+                        {{ form.image }}
+                    </div>
                 </div>
-            </div>
-            
-            <div class="form-actions">
-                <button type="submit" class="submit-btn">Edit Product</button>
-                <button type="button" class="cancel-btn">Cancel</button>
-            </div>
-        </form>
+
+                <div class="form-actions">
+                    <button type="submit" class="submit-btn">Edit Product</button>
+                    <button type="button" class="cancel-btn">Cancel</button>
+                </div>
+            </form>
+        </div>
+        <script src="{% static 'edit_product.js' %}"></script>
+        {% endblock %}
     </div>
-    <script src="{% static 'edit_product.js' %}"></script>
 </body>
+
 </html>

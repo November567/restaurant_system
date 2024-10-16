@@ -12,48 +12,60 @@
     {% csrf_token %}
     <div class="container kds-container">
         <header class="kds-header">
-            <h1>Kitchen Display System</h1>
+            <h1>Kitchen Display System - In Progress Orders</h1>
             <nav class="kds-nav">
-                <button class="nav-btn all-orders active">All Orders</button>
-                <button class="nav-btn in-progress">In Progress</button>
+                <button class="nav-btn in-progress active">In Progress</button>
                 <button class="nav-btn completed">Completed</button>
             </nav>
         </header>
         
         <main class="kds-main" role="main">
-            <div class="order-grid">
-                {% for status, orders in orders.items %}
-                    {% if orders %}
-                        {% for order in orders %}
-                            <div class="order-card {{ status }}" data-id="{{ order.id }}">
-                                <div class="order-header">
-                                    <h2>Order #{{ order.id }}</h2>
-                                    <span class="order-time">{{ order.created_at|date:"H:i" }}</span>
-                                </div>
-                                <p>Table #{{ order.table.id }}</p>
-                                <ul class="order-items">
-                                    {% for item in order.orderitem_set.all %}
-                                        <li>
-                                            <span class="item-name">{{ item.menu_item.name }}</span>
-                                            <span class="item-quantity">x{{ item.quantity }}</span>
-                                        </li>
-                                    {% endfor %}
-                                </ul>
-                                <div class="order-actions">
-                                    {% if status != 'completed' %}
-                                        <button class="btn btn-primary"><i class="fas fa-check"></i> Complete</button>
-                                    {% endif %}
-                                    <button class="btn btn-secondary"><i class="fas fa-eye"></i> View Details</button>
-                                </div>
-                            </div>
-                        {% endfor %}
-                    {% endif %}
+            <div class="order-grid in-progress-section">
+                {% for order in orders.in_progress %}
+                    <div class="order-card in-progress" data-id="{{ order.id }}" data-status="in-progress">
+                        <div class="order-header">
+                            <h2>Order #{{ order.id }}</h2>
+                            <span class="order-time">{{ order.created_at|date:"H:i" }}</span>
+                        </div>
+                        <p>Table #{{ order.table.id }}</p>
+                        <ul class="order-items">
+                            {% for item in order.orderitem_set.all %}
+                                <li>
+                                    <span class="item-name">{{ item.menu_item.name }}</span>
+                                    <span class="item-quantity">x{{ item.quantity }}</span>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                        <div class="order-actions">
+                            <button class="btn btn-primary complete-order"><i class="fas fa-check"></i> Complete</button>
+                            <button class="btn btn-secondary"><i class="fas fa-eye"></i> View Details</button>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+            <div class="order-grid completed-section" style="display: none;">
+                {% for order in orders.completed %}
+                    <div class="order-card completed" data-id="{{ order.id }}" data-status="completed">
+                        <div class="order-header">
+                            <h2>Order #{{ order.id }}</h2>
+                            <span class="order-time">{{ order.created_at|date:"H:i" }}</span>
+                        </div>
+                        <p>Table #{{ order.table.id }}</p>
+                        <ul class="order-items">
+                            {% for item in order.orderitem_set.all %}
+                                <li>
+                                    <span class="item-name">{{ item.menu_item.name }}</span>
+                                    <span class="item-quantity">x{{ item.quantity }}</span>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                        <div class="order-actions">
+                            <button class="btn btn-secondary"><i class="fas fa-eye"></i> View Details</button>
+                        </div>
+                    </div>
                 {% endfor %}
             </div>
         </main>
-    </div>
-    <div class="completed-orders" style="display: none;">
-        <!-- Completed orders will be moved here -->
     </div>
     <script src="{% static 'kitchen.js' %}"></script>
 </body>

@@ -52,6 +52,7 @@ body {
     cursor: pointer;
     margin-right: 10px;
     border-radius: 5px;
+    transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 .kds-nav button.active {
@@ -59,18 +60,11 @@ body {
     color: white;
 }
 
-.kds-nav button.in-progress {
-    background-color: #e5e5e5;
-}
-
-.kds-nav button.completed {
-    background-color: #e5e5e5;
-}
-
 .kds-nav button:hover {
     background-color: #ff9986; /* Lighter orange on hover */
     color: white;
 }
+
 
 /* Order Grid */
 .kds-main {

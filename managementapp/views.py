@@ -3,9 +3,10 @@ from .models import Table, MenuItem, Order, Payment
 from django.http import JsonResponse
 from django.urls import reverse
 from django.db import transaction
+from django.utils import timezone
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_http_methods
-from django.views.decorators.http import require_POST
+from django.views.decorators.csrf import csrf_exempt
 from .models import Table, MenuItem, Order, OrderItem
 from .forms import MenuItemForm
 import json
@@ -55,7 +56,7 @@ def food_order(request, item_id, table_id, order_id=None, order_item_id=None):
                 total_price = request.POST.get('total_price', 0)
                 size = request.POST.get("size", "")
 
-                order = current_order or Order.objects.create(table=table, status="Paying")
+                order = current_order or Order.objects.create(table=table, status="Pending")
 
                 if current_order_item:
                     current_order_item.quantity = quantity
@@ -227,30 +228,39 @@ def update_menu_item_status(request, item_id):
 
 @login_required
 def kitchen_display(request):
-    if request.method == "POST":
-        order_id = request.POST.get('order_id')
-        action = request.POST.get('action')
+    pending_orders = Order.objects.filter(status="Pending")
+    in_progress_orders = Order.objects.filter(status="In Progress")
 
-        if action == 'complete':
-            try:
-                order = Order.objects.get(id=order_id)
-                order.status = "Completed"
-                order.save()
-                return JsonResponse({'success': True})
-            except Order.DoesNotExist:
-                return JsonResponse({'success': False, 'error': 'Order not found'}, status=404)
-            except Exception as e:
-                return JsonResponse({'success': False, 'error': str(e)}, status=500)
-        else:
-            return JsonResponse({'success': False, 'error': 'Invalid action'}, status=400)
+    pending_orders.update(status="In Progress")
 
-    # GET request handling
     orders = {
-        'pending': Order.objects.filter(status="Pending"),
-        'in_progress': Order.objects.filter(status="In Progress"),
-        'completed': Order.objects.filter(status="Completed"),
+        'in_progress': in_progress_orders,
     }
+
     return render(request, "managementapp/kitchen.html", {"orders": orders})
+
+@login_required
+def completed_kitchen_display(request):
+    completed_orders = Order.objects.filter(status="Completed")
+    orders = {
+        'completed': completed_orders,
+    }
+
+    return render(request, "managementapp/completed_kitchen.html", {"orders": orders})
+
+
+@csrf_exempt  
+def complete_order(request, order_id):
+    if request.method == 'POST':
+        try:
+            order = Order.objects.get(id=order_id)
+            order.status = "Completed"
+            order.completed_at = timezone.now()
+            order.save()
+            return JsonResponse({'success': True})
+        except Order.DoesNotExist:
+            return JsonResponse({'success': False, 'error': 'Order not found.'})
+    return JsonResponse({'success': False, 'error': 'Invalid request method.'})
 
 def get_order_details(request, order_id):
     try:
@@ -272,34 +282,23 @@ def get_order_details(request, order_id):
 def process_payment(request, order_id):
     order = get_object_or_404(Order, pk=order_id)
     if request.method == "POST":
-        # Example: Handle the payment (you might want to integrate a payment gateway)
-        payment_method = request.POST.get('payment_method')  # Assume this is passed from the form
+        payment_method = request.POST.get('payment_method')  
         amount = sum(item.total_price for item in order.orderitem_set.all())
 
-        # Create a payment record
         Payment.objects.create(
             order=order,
             amount=amount,
             payment_method=payment_method,
         )
 
-        # Update order status
         order.status = 'Pending'
+        order.created_at = timezone.now()
         order.save()
 
-        return redirect('menu_list', table_id=order.table.id)  # Redirect to a confirmation page after payment
+        return redirect('menu_list', table_id=order.table.id)  
 
     return render(request, "managementapp/payment.html", {"order": order})
 
 
 def generate_reports(request):
-    # Generate reports and analytics
     return render(request, "managementapp/reports.html")
-
-
-def update_order_status(request, order_id, new_status):
-    order = get_object_or_404(Order, pk=order_id)
-    if new_status in ["Pending", "In Progress", "Completed"]:
-        order.status = new_status
-        order.save()
-    return redirect("kitchen_display")

@@ -49,8 +49,9 @@ class Order(models.Model):
 
     table = models.ForeignKey(Table, on_delete=models.CASCADE)
     items = models.ManyToManyField(MenuItem, through=OrderItem) 
-    created_at = models.DateTimeField(auto_now_add=True)
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="Paying")
+    created_at = models.DateTimeField(null=True, blank=True)
+    completed_at = models.DateTimeField(null=True, blank=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="Pending")
 
     def __str__(self):
         return f"Order {self.id} for Table {self.table.number} - {self.status}"

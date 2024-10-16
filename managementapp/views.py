@@ -299,6 +299,17 @@ def process_payment(request, order_id):
 
     return render(request, "managementapp/payment.html", {"order": order})
 
+@login_required
+def dashboard(request):
+    tables = Table.objects.all()
+    menu_items = MenuItem.objects.all()
+    orders = Order.objects.all()
+    payments = Payment.objects.all()
 
-def generate_reports(request):
-    return render(request, "managementapp/reports.html")
+    context = {
+        'tables': tables,
+        'menu_items': menu_items,
+        'orders': orders,
+        'payments': payments,
+    }
+    return render(request, 'managementapp/dashboard.html', context)

@@ -1,3 +1,7 @@
+document.querySelector('.nav-button').addEventListener('click', function() {
+    document.querySelector('.nav-dropdown').classList.toggle('show');
+});
+
 const simulatedData = {
     today: {
         totalOrders: 34,

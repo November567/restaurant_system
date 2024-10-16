@@ -1,89 +1,170 @@
-<!-- Add this to your HTML file, just before the closing </body> tag -->
-<div id="orderDetailsModal" class="modal">
-    <div class="modal-content">
-      <span class="close">&times;</span>
-      <h2>Order Details</h2>
-      <div id="orderDetailsContent"></div>
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Details - #{{ order.id }}</title>
+    <link rel="stylesheet" href="{% static 'style_kitchen.css' %}">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f9f9f9;
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: white;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        header h1 {
+            font-size: 24px;
+            color: #e74c3c;
+        }
+
+        header p {
+            font-size: 16px;
+            color: #7f8c8d;
+        }
+
+        .order-info {
+            display: flex;
+            justify-content: space-between;
+            background-color: #f0f3f4;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+        }
+
+        .order-info p {
+            margin: 0;
+            font-size: 16px;
+        }
+
+        .order-items {
+            display: block;
+            gap: 15px;
+        }
+
+        .order-item {
+            width: 100%;  /* Takes full width */
+            background-color: #f8f9f9;
+            border: 1px solid #e0e0e0;
+            padding: 20px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px; /* Adds space between rows */
+        }
+
+        .order-item img {
+            width: 80px;
+            height: 80px;
+            border-radius: 8px;
+            margin-right: 20px;
+        }
+
+        .order-item div {
+            flex-grow: 1;
+        }
+
+        .order-item strong {
+            display: block;
+            font-size: 18px;
+            color: #34495e;
+            margin-bottom: 5px;
+        }
+
+        .total-payment {
+            font-size: 18px;
+            margin-top: 20px;
+            text-align: right;
+            color: #27ae60;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            font-size: 16px;
+            color: white;
+            background-color: #2980b9;
+            text-align: center;
+            border-radius: 8px;
+            text-decoration: none;
+            margin-top: 20px;
+            transition: background-color 0.3s ease;
+        }
+
+        .btn:hover {
+            background-color: #3498db;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 30px;
+            font-size: 14px;
+            color: #7f8c8d;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Order Details - Order #{{ order.id }}</h1>
+            <div class="order-info">
+                <p><strong>Status:</strong> {{ order.status }}</p>
+                <p><strong>Table:</strong> {{ order.table.number }}</p>
+                <p><strong>Created at:</strong> {{ order.created_at }}</p>
+                <p><strong>Completed at:</strong> {% if order.completed_at %}{{ order.completed_at }}{% else %}Not completed yet{% endif %}</p>
+            </div>
+        </header>
+
+        <main>
+            <h2>Order Items</h2>
+            <div class="order-items">
+                {% for item in order_items %}
+                    <div class="order-item">
+                        <img src="{{ item.menu_item.image.url }}" alt="{{ item.menu_item.name }}">
+                        <div>
+                            <strong>{{ item.quantity }} x {{ item.menu_item.name }}</strong>
+                            (Size: {{ item.size|default:"Regular" }}, Special Requests: {{ item.special_requests|default:"None" }})
+                            <br>Total Price: ${{ item.total_price }}
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+
+            <div class="total-payment">
+                <p>Total Payment: 
+                    {% if order.payment_set.exists %}
+                        ${{ order.payment_set.first.amount }} 
+                        <br>via {{ order.payment_set.first.payment_method }} 
+                        <br>at {{ order.payment_set.first.paid_at }}
+                    {% else %}
+                        <span style="color: #c0392b;">Payment not completed.</span>
+                    {% endif %}
+                </p>
+            </div>
+
+            <a href="{% url 'kitchen_display' %}" class="btn">Back to Kitchen</a>
+        </main>
+
+        <footer>
+            <p>&copy; {{ current_year }} Your Restaurant Name</p>
+        </footer>
     </div>
-  </div>
-  
-  <style>
-    .modal {
-      display: none;
-      position: fixed;
-      z-index: 1;
-      left: 0;
-      top: 0;
-      width: 100%;
-      height: 100%;
-      overflow: auto;
-      background-color: rgba(0,0,0,0.4);
-    }
-  
-    .modal-content {
-      background-color: #fefefe;
-      margin: 15% auto;
-      padding: 20px;
-      border: 1px solid #888;
-      width: 80%;
-    }
-  
-    .close {
-      color: #aaa;
-      float: right;
-      font-size: 28px;
-      font-weight: bold;
-      cursor: pointer;
-    }
-  
-    .close:hover,
-    .close:focus {
-      color: black;
-      text-decoration: none;
-      cursor: pointer;
-    }
-  </style>
-  
-  <script>
-  document.addEventListener('DOMContentLoaded', function() {
-    const orderGrid = document.querySelector('.order-grid');
-    const modal = document.getElementById('orderDetailsModal');
-    const closeBtn = modal.querySelector('.close');
-    const orderDetailsContent = document.getElementById('orderDetailsContent');
-  
-    orderGrid.addEventListener('click', function(event) {
-      if (event.target.classList.contains('btn-secondary')) {
-        const orderCard = event.target.closest('.order-card');
-        const orderId = orderCard.querySelector('h2').textContent.split('#')[1];
-  
-        // Fetch order details
-        fetch(`/get-order-details/${orderId}/`)
-          .then(response => response.json())
-          .then(data => {
-            // Populate modal with order details
-            orderDetailsContent.innerHTML = `
-              <p><strong>Order ID:</strong> ${data.id}</p>
-              <p><strong>Table:</strong> ${data.table}</p>
-              <p><strong>Status:</strong> ${data.status}</p>
-              <p><strong>Created At:</strong> ${data.created_at}</p>
-              <h3>Items:</h3>
-              <ul>
-                ${data.items.map(item => `<li>${item.name} x${item.quantity}</li>`).join('')}
-              </ul>
-            `;
-            modal.style.display = 'block';
-          });
-      }
-    });
-  
-    closeBtn.onclick = function() {
-      modal.style.display = 'none';
-    }
-  
-    window.onclick = function(event) {
-      if (event.target == modal) {
-        modal.style.display = 'none';
-      }
-    }
-  });
-  </script>
+</body>
+</html>

@@ -37,7 +37,8 @@
                             {% endfor %}
                         </ul>
                         <div class="order-actions">
-                            <button class="btn btn-secondary"><i class="fas fa-eye"></i> View Details</button>
+                            <button class="btn btn-secondary view-details" data-id="{{ order.id }}">
+                                <i class="fas fa-eye"></i> View Details
                         </div>
                     </div>
                 {% endfor %}

@@ -263,21 +263,18 @@ def complete_order(request, order_id):
     return JsonResponse({'success': False, 'error': 'Invalid request method.'})
 
 def get_order_details(request, order_id):
-    try:
-        order = Order.objects.get(id=order_id)
-        data = {
-            "id": order.id,
-            "table": order.table.id,
-            "status": order.status,
-            "created_at": order.created_at.strftime("%Y-%m-%d %H:%M:%S"),
-            "items": [
-                {"name": item.menu_item.name, "quantity": item.quantity}
-                for item in order.orderitem_set.all()
-            ]
-        }
-        return JsonResponse(data)
-    except Order.DoesNotExist:
-        return JsonResponse({"error": "Order not found"}, status=404)
+        # ดึงข้อมูลคำสั่งซื้อตาม order_id
+    order = get_object_or_404(Order, id=order_id)
+
+    # ดึงรายการคำสั่งซื้อที่เกี่ยวข้อง (OrderItems)
+    order_items = order.orderitem_set.all()
+
+    context = {
+        'order': order,
+        'order_items': order_items,
+    }
+
+    return render(request, 'managementapp/order_detail.html', context)
 
 def process_payment(request, order_id):
     order = get_object_or_404(Order, pk=order_id)
@@ -302,3 +299,5 @@ def process_payment(request, order_id):
 
 def generate_reports(request):
     return render(request, "managementapp/reports.html")
+
+

@@ -18,6 +18,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return cookieValue;
     }
 
+    // Handle clicking on the "Complete" button
     document.addEventListener('click', async (event) => {
         if (event.target.classList.contains('complete-order')) {
             const orderCard = event.target.closest('.order-card');
@@ -59,6 +60,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
         }
+
+        // Handle clicking on the "View Details" button
+        if (event.target.classList.contains('view-details')) {
+            const orderId = event.target.closest('.order-card').dataset.id;
+            // Redirect to the order detail page
+            window.location.href = `/get-order-details/${orderId}/`; // Django URL for the order detail
+        }
     });
 
     // Navigation functionality
@@ -89,3 +97,4 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 });
+

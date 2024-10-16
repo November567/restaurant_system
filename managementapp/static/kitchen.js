@@ -18,6 +18,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return cookieValue;
     }
 
+    // Handle clicking on the "Complete" button
     document.addEventListener('click', async (event) => {
         if (event.target.classList.contains('complete-order')) {
             const orderCard = event.target.closest('.order-card');
@@ -58,6 +59,16 @@ document.addEventListener('DOMContentLoaded', () => {
                     console.error('Error:', error);
                 }
             }
+        }
+    });
+
+    // Handle clicking on the "View Details" button
+    document.addEventListener('click', (event) => {
+        if (event.target.closest('.view-details')) {
+            const button = event.target.closest('.view-details');
+            const orderId = button.dataset.id;
+            // Redirect to the order detail page
+            window.location.href = `/get-order-details/${orderId}/`; // Django URL for the order detail
         }
     });
 

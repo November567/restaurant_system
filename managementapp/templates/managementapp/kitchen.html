@@ -58,10 +58,20 @@
 <body>
     <aside class="sidebar">
         <h2>Menu</h2>
-        <a href="{% url 'dashboard' %}">Dashboard</a>
-        <a href="{% url 'kitchen_display' %}">Order</a>
-        <a href="{% url 'menu_management' %}">Menu Menagement</a>
-        <a href="{% url 'logout' %}">Logout</a>
+        <nav>
+            <a href="{% url 'dashboard' %}" {% if request.resolver_match.url_name == 'dashboard' %}class="active"{% endif %}>
+                <i class="fas fa-chart-line"></i> Dashboard
+            </a>
+            <a href="{% url 'kitchen_display' %}" {% if request.resolver_match.url_name == 'kitchen_display' or request.resolver_match.url_name == 'completed_kitchen_display' %}class="active"{% endif %}>
+                <i class="fas fa-utensils"></i> Orders
+            </a>
+            <a href="{% url 'menu_management' %}" {% if request.resolver_match.url_name == 'menu_management' %}class="active"{% endif %}>
+                <i class="fas fa-book-open"></i> Menu Management
+            </a>
+            <a href="{% url 'logout' %}">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </a>
+        </nav>
     </aside>
     <div class="content">
         {% block content %}
@@ -77,31 +87,55 @@
 
 
             <main class="kds-main" role="main">
-                <div class="order-grid completed-section">
+                <div class="order-grid in-progress-section">
                     {% for order in orders.in_progress %}
-                    <div class="order-card completed" data-id="{{ order.id }}" data-status="completed">
-                        <div class="order-header">
-                            <h2>Order #{{ order.id }}</h2>
-                            <span class="order-time">{{ order.created_at|date:"H:i" }}</span>
-                        </div>
-                        <p>Table #{{ order.table.id }}</p>
-                        <ul class="order-items">
-                            {% for item in order.orderitem_set.all %}
-                            <li>
-                                <span class="item-name">{{ item.menu_item.name }}</span>
-                                <span class="item-quantity">x{{ item.quantity }}</span>
-                            </li>
-                            {% endfor %}
-                        </ul>
-                        <div class="order-actions">
-                            <button class="btn btn-primary complete-order"><i class="fas fa-check"></i>
-                                Complete
-                            </button>
-                            <button class="btn btn-secondary view-details" data-id="{{ order.id }}">
+                        <div class="order-card in-progress" data-id="{{ order.id }}" data-status="in-progress">
+                            <div class="order-header">
+                                <h2>Order #{{ order.id }}</h2>
+                                <span class="order-time">{{ order.created_at|date:"H:i" }}</span>
+                            </div>
+                            <p>Table #{{ order.table.id }}</p>
+                            <ul class="order-items">
+                                {% for item in order.orderitem_set.all %}
+                                    <li>
+                                        <span class="item-name">{{ item.menu_item.name }}</span>
+                                        <span class="item-quantity">x{{ item.quantity }}</span>
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                            <div class="order-actions">
+                                <button class="btn btn-primary complete-order"><i class="fas fa-check"></i> Complete</button>
+                                <button class="btn btn-secondary view-details" data-id="{{ order.id }}">
                                     <i class="fas fa-eye"></i> View Details
-                            </button>
+                                </button>
+                                
+                            </div>
                         </div>
-                    </div>
+                    {% endfor %}
+                </div>
+                <div class="order-grid completed-section" style="display: none;">
+                    {% for order in orders.completed %}
+                        <div class="order-card completed" data-id="{{ order.id }}" data-status="completed">
+                            <div class="order-header">
+                                <h2>Order #{{ order.id }}</h2>
+                                <span class="order-time">{{ order.created_at|date:"H:i" }}</span>
+                            </div>
+                            <p>Table #{{ order.table.id }}</p>
+                            <ul class="order-items">
+                                {% for item in order.orderitem_set.all %}
+                                    <li>
+                                        <span class="item-name">{{ item.menu_item.name }}</span>
+                                        <span class="item-quantity">x{{ item.quantity }}</span>
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                            <div class="order-actions">
+                                <button class="btn btn-secondary view-details" data-id="{{ order.id }}">
+                                    <i class="fas fa-eye"></i> View Details
+                                </button>
+                                
+                            </div>
+                        </div>
                     {% endfor %}
                 </div>
             </main>

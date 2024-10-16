@@ -61,7 +61,7 @@
         <a href="{% url 'dashboard' %}">Dashboard</a>
         <a href="{% url 'kitchen_display' %}">Order</a>
         <a href="{% url 'menu_management' %}">Menu Menagement</a>
-        <a href="#">Logout</a>
+        <a href="{% url 'logout' %}">Logout</a>
     </aside>
     <div class="content">
         {% block content %}
@@ -95,8 +95,11 @@
                         </ul>
                         <div class="order-actions">
                             <button class="btn btn-primary complete-order"><i class="fas fa-check"></i>
-                                Complete</button>
-                            <button class="btn btn-secondary"><i class="fas fa-eye"></i> View Details</button>
+                                Complete
+                            </button>
+                            <button class="btn btn-secondary view-details" data-id="{{ order.id }}">
+                                    <i class="fas fa-eye"></i> View Details
+                            </button>
                         </div>
                     </div>
                     {% endfor %}

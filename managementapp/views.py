@@ -8,6 +8,10 @@ from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_http_methods
 from django.views.decorators.csrf import csrf_exempt
 from .models import Table, MenuItem, Order, OrderItem
+from django.contrib.auth import login, logout, authenticate
+from django.contrib.auth.forms import AuthenticationForm
+from django.contrib import messages
+from django.contrib.auth.models import User
 from .forms import MenuItemForm
 import json
 
@@ -263,21 +267,16 @@ def complete_order(request, order_id):
     return JsonResponse({'success': False, 'error': 'Invalid request method.'})
 
 def get_order_details(request, order_id):
-    try:
-        order = Order.objects.get(id=order_id)
-        data = {
-            "id": order.id,
-            "table": order.table.id,
-            "status": order.status,
-            "created_at": order.created_at.strftime("%Y-%m-%d %H:%M:%S"),
-            "items": [
-                {"name": item.menu_item.name, "quantity": item.quantity}
-                for item in order.orderitem_set.all()
-            ]
-        }
-        return JsonResponse(data)
-    except Order.DoesNotExist:
-        return JsonResponse({"error": "Order not found"}, status=404)
+    order = get_object_or_404(Order, id=order_id)
+
+    order_items = order.orderitem_set.all()
+
+    context = {
+        'order': order,
+        'order_items': order_items,
+    }
+
+    return render(request, 'managementapp/order_detail.html', context)
 
 def process_payment(request, order_id):
     order = get_object_or_404(Order, pk=order_id)
@@ -313,3 +312,54 @@ def dashboard(request):
         'payments': payments,
     }
     return render(request, 'managementapp/dashboard.html', context)
+
+def user_logout(request):
+    logout(request)
+    return redirect('login')
+
+def user_login(request):
+    if request.method == 'POST':
+        form = AuthenticationForm(request, data=request.POST)
+        if form.is_valid():
+            username = form.cleaned_data.get('username')
+            password = form.cleaned_data.get('password')
+            user = authenticate(username=username, password=password)
+            if user is not None:
+                login(request, user)
+                return redirect('kitchen_display')
+            else:
+                messages.error(request, 'Invalid credentials')
+        else:
+            messages.error(request, 'Invalid credentials')
+    return render(request, 'managementapp/login.html')
+
+def user_register(request):
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+        confirm_password = request.POST.get('confirmPassword')
+        email = request.POST.get('email')
+
+        if not username or not password or not confirm_password or not email:
+            messages.error(request, "All fields are required")
+            return render(request, 'managementapp/register.html')
+
+        if password != confirm_password:
+            messages.error(request, "Passwords do not match")
+            return render(request, 'managementapp/register.html')
+
+        if User.objects.filter(username=username).exists():
+            messages.error(request, "Username is already taken")
+            return render(request, 'managementapp/register.html')
+
+        if User.objects.filter(email=email).exists():
+            messages.error(request, "Email is already registered")
+            return render(request, 'managementapp/register.html')
+
+        user = User.objects.create_user(username=username, password=password, email=email)
+        user.save()
+
+        messages.success(request, "Account created successfully")
+        return redirect('login') 
+
+    return render(request, 'managementapp/register.html')

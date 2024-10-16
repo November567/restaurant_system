@@ -21,5 +21,8 @@ urlpatterns = [
     path('api/menu_items/<int:item_id>/update/', views.update_menu_item_status, name='update_menu_item_status'),
     path('get-order-details/<int:order_id>/', views.get_order_details, name='get_order_details'),
     path('api/orders/<int:order_id>/complete/', views.complete_order, name='complete_order'),
+    path('register/', views.user_register, name='register'),
+    path('', views.user_login, name='login'),
+    path('logout/', views.user_logout, name='logout'),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 

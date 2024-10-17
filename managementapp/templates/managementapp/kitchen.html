@@ -9,7 +9,9 @@
     <title>Kitchen Display System</title>
     {% endblock %}
     {% block css %}
+    <link rel="stylesheet" href="{% static 'style_sidebar.css' %}">
     <link rel="stylesheet" href="{% static 'style_kitchen.css' %}">
+    <link rel="stylesheet" href="{% static 'style_menu_management.css' %}">
     <script src="https://kit.fontawesome.com/your-fontawesome-kit.js" crossorigin="anonymous"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     {% endblock %}
@@ -57,23 +59,27 @@
 </head>
 
 <body>
-    <aside class="sidebar">
-        <h2>Menu</h2>
-        <nav>
-            <a href="{% url 'dashboard' %}" {% if request.resolver_match.url_name == 'dashboard' %}class="active"{% endif %}>
+
+    <div class="sidebar">
+        <h1 class="menu-title">Menu</h1>
+
+            <a href="{% url 'dashboard' %}" class="menu-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
                 <i class="fas fa-chart-line"></i> Dashboard
             </a>
-            <a href="{% url 'kitchen_display' %}" {% if request.resolver_match.url_name == 'kitchen_display' or request.resolver_match.url_name == 'completed_kitchen_display' %}class="active"{% endif %}>
+            
+            <a href="{% url 'kitchen_display' %}" class="menu-link {% if request.resolver_match.url_name == 'kitchen_display' or request.resolver_match.url_name == 'completed_kitchen_display' %}active{% endif %}">
                 <i class="fas fa-utensils"></i> Orders
             </a>
-            <a href="{% url 'menu_management' %}" {% if request.resolver_match.url_name == 'menu_management' %}class="active"{% endif %}>
+
+            <a href="{% url 'menu_management' %}" class="menu-link {% if request.resolver_match.url_name == 'menu_management' %}active{% endif %}">
                 <i class="fas fa-book-open"></i> Menu Management
             </a>
-            <a href="{% url 'logout' %}">
+
+            <a href="{% url 'logout' %}" class="menu-link">
                 <i class="fas fa-sign-out-alt"></i> Logout
             </a>
-        </nav>
-    </aside>
+    </div>
+
     <div class="content">
         {% block content %}
         {% csrf_token %}

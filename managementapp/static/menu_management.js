@@ -134,7 +134,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Edit item functionality
     function editItem(itemId) {
-        window.location.href = `/edit_menu_item/${itemId}/`;
+        window.location.href = `/edit_product/${itemId}/`;
     }
 
     // Delete item functionality
@@ -206,7 +206,3 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
 });
-
-document.querySelector('.nav-button').addEventListener('click', function() {
-    document.querySelector('.nav-dropdown').classList.toggle('show');
-}); // when click dropdown menu button

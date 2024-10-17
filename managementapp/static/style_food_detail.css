@@ -16,17 +16,6 @@ body {
     padding: 0;
 }
 
-.item-header {
-    position: relative;
-    background-image: url('profile-picture.jpg');
-    background-size: cover;
-    background-position: center;
-    height: 200px;
-    display: flex;
-    align-items: flex-end;
-    padding: 20px;
-    color: white;
-}
 
 .back-button {
     position: absolute;

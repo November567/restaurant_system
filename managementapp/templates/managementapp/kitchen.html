@@ -5,35 +5,68 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kitchen Display System</title>
-    <link rel="stylesheet" href="style_kitchen.css">
+    <link rel="stylesheet" href="{% static 'style_kitchen.css' %}">
     <script src="https://kit.fontawesome.com/your-fontawesome-kit.js" crossorigin="anonymous"></script>
 </head>
 <body>
+    {% csrf_token %}
     <div class="container kds-container">
         <header class="kds-header">
-            <h1>Kitchen Display System</h1>
-
-            <div class="nav-button-container">
-                <button class="nav-button">
-                    <i class="fas fa-bars"></i>
-                </button>
-                <div class="nav-dropdown">
-                    <a href="menu_management.html">Menu Management</a>
-                    <a href="reporting.html">Reporting</a>
-                </div>
-            </div>
-
+            <h1>Kitchen Display System - In Progress Orders</h1>
             <nav class="kds-nav">
-                <button class="nav-btn active" data-status="all">All Orders</button>
-                <button class="nav-btn" data-status="in-progress">In Progress</button>
-                <button class="nav-btn" data-status="completed">Completed</button>
+                <button class="nav-btn in-progress active">In Progress</button>
+                <button class="nav-btn completed">Completed</button>
             </nav>
         </header>
-
+        
         <main class="kds-main" role="main">
-            <!-- Order cards will be dynamically inserted here -->
+            <div class="order-grid in-progress-section">
+                {% for order in orders.in_progress %}
+                    <div class="order-card in-progress" data-id="{{ order.id }}" data-status="in-progress">
+                        <div class="order-header">
+                            <h2>Order #{{ order.id }}</h2>
+                            <span class="order-time">{{ order.created_at|date:"H:i" }}</span>
+                        </div>
+                        <p>Table #{{ order.table.id }}</p>
+                        <ul class="order-items">
+                            {% for item in order.orderitem_set.all %}
+                                <li>
+                                    <span class="item-name">{{ item.menu_item.name }}</span>
+                                    <span class="item-quantity">x{{ item.quantity }}</span>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                        <div class="order-actions">
+                            <button class="btn btn-primary complete-order"><i class="fas fa-check"></i> Complete</button>
+                            <button class="btn btn-secondary"><i class="fas fa-eye"></i> View Details</button>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+            <div class="order-grid completed-section" style="display: none;">
+                {% for order in orders.completed %}
+                    <div class="order-card completed" data-id="{{ order.id }}" data-status="completed">
+                        <div class="order-header">
+                            <h2>Order #{{ order.id }}</h2>
+                            <span class="order-time">{{ order.created_at|date:"H:i" }}</span>
+                        </div>
+                        <p>Table #{{ order.table.id }}</p>
+                        <ul class="order-items">
+                            {% for item in order.orderitem_set.all %}
+                                <li>
+                                    <span class="item-name">{{ item.menu_item.name }}</span>
+                                    <span class="item-quantity">x{{ item.quantity }}</span>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                        <div class="order-actions">
+                            <button class="btn btn-secondary"><i class="fas fa-eye"></i> View Details</button>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
         </main>
     </div>
-    <script src="kitchen.js"></script>
+    <script src="{% static 'kitchen.js' %}"></script>
 </body>
 </html>

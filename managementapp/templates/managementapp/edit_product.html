@@ -53,6 +53,14 @@
             </div>
             <div class="form-group">
                 <label for="product-image">Product Image</label>
+            
+                {% if form.image.value %}
+                    <div class="current-image">
+                        <p>Current Image:</p>
+                        <img src="{{ form.image.value.url }}" alt="Current product image" class="product-image-preview">
+                    </div>
+                {% endif %}
+            
                 <div class="custom-file-input">
                     {{ form.image }}
                 </div>

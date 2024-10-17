@@ -31,17 +31,16 @@
         <div class="container">
             {% for category, items in categories.items %}
             <section id="{{ category|lower }}" class="section">
-                <h2>{{ category }}</h2>
+                <h2>{{ category|title }}</h2>
                 <div class="menu-grid">
                     <div class="menu-list">
                         {% for item in items %}
-                        <div class="menu-item">
+                        <div class="menu-item" data-item-id="{{ item.id }}" data-table-id="{{ table.id }}" >
                             <div class="menu-item-image">
                                 {% if item.image %}
-                                <img src="{{ item.image.url }}" alt="{{ item.name }}"> <!-- แสดงรูปภาพ -->
+                                <img src="{{ item.image.url }}" alt="{{ item.name }}">
                                 {% else %}
                                 <img src="{% static 'path/to/default/image.png' %}" alt="Default Image">
-                                <!-- แสดงรูปภาพดีฟอลต์ถ้าไม่มี -->
                                 {% endif %}
                             </div>
                             <div class="menu-item-details">
@@ -49,7 +48,7 @@
                                 <div class="menu-item-description">{{ item.description }}</div>
                                 <div class="menu-item-price">{{ item.price }} Baht</div>
                             </div>
-                            <button class="add-button" onclick="window.location.href='food_detail.html'">+</button>
+                            <button class="add-button" type="button">+</button>
                         </div>
                         {% endfor %}
                     </div>
@@ -59,9 +58,11 @@
         </div>
     </main>
 
-    <button class="basket-button" onclick="window.location.href='food_detail.html'">
+    <button class="basket-button" data-order-id="{{ current_order.id }}">
         <i class="fas fa-shopping-basket"></i>
-        <span class="item-count">0</span>
+        {% if current_order and current_order.items.count > 0 %}
+            <span class="item-count">{{ current_order.items.count }}</span>
+        {% endif %}
     </button>
 
     <script src="{% static 'menu_list.js' %}"></script>

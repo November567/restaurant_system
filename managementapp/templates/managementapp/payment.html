@@ -5,78 +5,66 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Payment Page</title>
-    <link rel="stylesheet" href="style_payment.css">
+    <link rel="stylesheet" href="{% static 'style_payment.css' %}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
     <div class="container">
         <header class="payment-header">
-            <a href="food-detail.html" class="back-button"><i class="fas fa-arrow-left"></i></a>
+            <a href="{% url 'menu_list' table_id=order.table.id order_id=order.id%}" class="back-button"><i class="fas fa-arrow-left"></i></a>
             <h1>Order Summary</h1>
         </header>
 
         <main class="payment-content">
             <section class="order-summary">
+                {% for item in order.orderitem_set.all %}
                 <div class="order-item">
                     <div class="item-image">
-                        <img src="profile-picture.jpg" alt="Papaya Salad">
+                        {% if item.menu_item.image %}
+                            <img src="{{ item.menu_item.image.url }}" alt="{{ item.menu_item.name }}">
+                        {% else %}
+                            <img src="{% static 'images/default-food-image.jpg' %}" alt="{{ item.menu_item.name }}">
+                        {% endif %}
                     </div>
                     <div class="item-details">
-                        <h2>Papaya Salad</h2>
-                        <p>Size M</p>
-                        <a href="food_detail.html" class="edit-link">Edit</a>
+                        <h2>{{ item.menu_item.name }}</h2>
+                        <p>Size {{ item.size }}</p>
+                        <a href="#" class="edit-link" data-table-id="{{ order.table.id }}" data-order-id="{{ order.id }}" data-item-id="{{ item.menu_item.id }}" data-order-item-id="{{ item.id }}">Edit</a>
                     </div>
-                    <div class="item-quantity">
-                        <button class="quantity-btn minus"><i class="fas fa-minus"></i></button>
-                        <span class="quantity">1</span>
-                        <button class="quantity-btn plus"><i class="fas fa-plus"></i></button>
-                    </div>
-                    <div class="item-price">80 ฿</div>
+                    <div class="quantity">{{ item.quantity }}x</div>
+                    <div class="item-price">{{ item.total_price }} ฿</div>
                 </div>
-
-                <div class="order-item">
-                    <div class="item-image">
-                        <img src="profile-picture.jpg" alt="Sticky rice">
-                    </div>
-                    <div class="item-details">
-                        <h2>Sticky rice</h2>
-                        <p>Size S</p>
-                        <a href="food_detail.html" class="edit-link">Edit</a>
-                    </div>
-                    <div class="item-quantity">
-                        <button class="quantity-btn minus"><i class="fas fa-minus"></i></button>
-                        <span class="quantity">2</span>
-                        <button class="quantity-btn plus"><i class="fas fa-plus"></i></button>
-                    </div>
-                    <div class="item-price">30 ฿</div>
-                </div>
+                {% endfor %}
             </section>
 
-            <section class="payment-methods">
-                <h2>Payment</h2>
-                <div class="payment-option">
-                    <input type="radio" id="cash" name="payment" value="cash">
-                    <label for="cash"><i class="fas fa-money-bill-alt"></i> Cash</label>
-                </div>
-                <div class="payment-option">
-                    <input type="radio" id="card" name="payment" value="card">
-                    <label for="card"><i class="fas fa-credit-card"></i> Cards</label>
-                </div>
-                <div class="payment-option">
-                    <input type="radio" id="mobile" name="payment" value="mobile">
-                    <label for="mobile"><i class="fas fa-mobile-alt"></i> Mobile banking</label>
-                </div>
-                <a href="#" class="more-options">more</a>
-            </section>
+            <form method="POST" action="{% url 'process_payment' order.id %}">
+                {% csrf_token %}
+                <section class="payment-methods">
+                    <h2>Payment</h2>
+                    <div class="payment-option">
+                        <input type="radio" id="cash" name="payment_method" value="cash">
+                        <label for="cash"><i class="fas fa-money-bill-alt"></i> Cash</label>
+                    </div>
+                    <div class="payment-option">
+                        <input type="radio" id="card" name="payment_method" value="card">
+                        <label for="card"><i class="fas fa-credit-card"></i> Cards</label>
+                    </div>
+                    <div class="payment-option">
+                        <input type="radio" id="mobile" name="payment_method" value="mobile">
+                        <label for="mobile"><i class="fas fa-mobile-alt"></i> Mobile banking</label>
+                    </div>
+                    <a href="#" class="more-options">more</a>
+                </section>
 
-            <section class="total-section">
-                <h2>Total</h2>
-                <div class="total-amount">130 ฿</div>
-            </section>
+                <section class="total-section">
+                    <h2>Total</h2>
+                    <div class="total-amount">{{ order.total_price }} ฿</div>
+                </section>
 
-            <button class="place-order-btn">Place order</button>
+                <button type="submit" class="place-order-btn">Place order</button>
+            </form>
         </main>
     </div>
-    <script src="payment.js"></script>
+    <script src="{% static 'payment.js' %}"></script>
 </body>
 </html>

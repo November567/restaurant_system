@@ -1,68 +1,72 @@
 {% extends "managementapp/kitchen.html" %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="en">
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    {% block title %}
-    <title>Restaurant Dashboard</title>
-    {% endblock %}
-    {% block css %}
-    <link rel="stylesheet" href="{% static 'style_reporting.css' %}">
-    <link rel="stylesheet" href="{% static 'style_kitchen.css' %}">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    {% endblock %}
+{% block title %}
+<title>Restaurant Dashboard</title>
+{% endblock %}
+
+{% block css %}
+<link rel="stylesheet" href="{% static 'style_reporting.css' %}">
+<link rel="stylesheet" href="{% static 'style_kitchen.css' %}">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+{% endblock %}
+
+{% block content %}
+<div class="reporting-container">
+    <!-- Error message container -->
+    <div id="dashboard-error" class="error-message" style="display: none;"></div>
     
-</head>
+    <header class="reporting-header">
+        <h1>Reporting and Analytics</h1>
+        <select id="dateRangeSelect" class="date-range">
+            <option value="today">Today</option>
+            <option value="week">This Week</option>
+            <option value="month">This Month</option>
+            <option value="year">This Year</option>
+        </select>
+    </header>
 
-<body>
-    <div class="reporting-container">
-        {% block content %}
-        <header class="reporting-header">
-            <h1>Reporting and Analytics</h1>
-            <select id="dateRangeSelect" class="date-range">
-                <option value="today">Today</option>
-                <option value="week">This Week</option>
-                <option value="month">This Month</option>
-                <option value="year">This Year</option>
-            </select>
-        </header>
-        <main class="reporting-main">
-            <section class="summary-cards">
-                <div class="summary-card">
-                    <h3>Total Orders</h3>
-                    <p id="totalOrders" class="summary-value"></p>
-                </div>
-                <div class="summary-card">
-                    <h3>Total Revenue</h3>
-                    <p id="totalRevenue" class="summary-value"></p>
-                </div>
-                <div class="summary-card">
-                    <h3>Avg. Order Value</h3>
-                    <p id="avgOrderValue" class="summary-value"></p>
-                </div>
-            </section>
-            <section class="charts-container">
-                <div class="chart-box">
-                    <h2>Revenue Trend</h2>
-                    <canvas id="revenueChart"></canvas>
-                </div>
-                <div class="chart-box">
-                    <h2>Item Performance</h2>
-                    <canvas id="itemPerformanceChart"></canvas>
-                </div>
-            </section>
-            <section class="top-selling">
-                <h2>Top Selling Items</h2>
-                <ul id="topSellingList" class="item-list"></ul>
-            </section>
-        </main>
-    </div>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="{% static 'reporting.js' %}"></script>
-    {% endblock %}
-</body>
+    <main class="reporting-main">
+        <!-- CSRF Token -->
+        {% csrf_token %}
+        
+        <!-- Summary Cards -->
+        <section class="summary-cards">
+            <div class="summary-card">
+                <h3>Total Orders</h3>
+                <p id="totalOrders" class="summary-value">0</p>
+            </div>
+            <div class="summary-card">
+                <h3>Total Revenue</h3>
+                <p id="totalRevenue" class="summary-value">฿0.00</p>
+            </div>
+            <div class="summary-card">
+                <h3>Avg. Order Value</h3>
+                <p id="avgOrderValue" class="summary-value">฿0.00</p>
+            </div>
+        </section>
 
-</html>
+        <!-- Charts -->
+        <section class="charts-container">
+            <div class="chart-box">
+                <h2>Revenue Trend</h2>
+                <canvas id="revenueChart"></canvas>
+            </div>
+            <div class="chart-box">
+                <h2>Item Performance</h2>
+                <canvas id="itemPerformanceChart"></canvas>
+            </div>
+        </section>
+
+        <!-- Top Selling Items -->
+        <section class="top-selling">
+            <h2>Top Selling Items</h2>
+            <ul id="topSellingList" class="item-list"></ul>
+        </section>
+    </main>
+</div>
+
+<!-- Scripts -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="{% static 'reporting.js' %}"></script>
+{% endblock %}

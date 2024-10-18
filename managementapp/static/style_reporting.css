@@ -95,13 +95,13 @@ body {
 .top-selling {
     background-color: #fff;
     border-radius: 8px;
-    padding: 15px;
+    padding: 20px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .top-selling h2 {
     margin-top: 0;
-    margin-bottom: 15px;
+    margin-bottom: 20px;
     font-size: 18px;
     color: #333;
 }
@@ -110,8 +110,8 @@ body {
     list-style-type: none;
     padding: 0;
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 15px;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 20px;
 }
 
 .item-list li {
@@ -119,32 +119,47 @@ body {
     align-items: center;
     background-color: #f9f9f9;
     border-radius: 8px;
-    padding: 10px;
+    padding: 15px;
+    transition: all 0.3s ease;
+}
+
+.item-list li:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
 }
 
 .item-image {
-    width: 50px;
-    height: 50px;
+    width: 80px;
+    height: 80px;
     background-color: #ddd;
     margin-right: 15px;
     border-radius: 4px;
+    overflow: hidden;
+}
+
+.item-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.item-details {
+    flex-grow: 1;
 }
 
 .item-details h3 {
-    margin: 0;
+    margin: 0 0 5px 0;
     font-size: 16px;
     color: #333;
 }
 
 .item-details p {
-    margin: 5px 0 0;
+    margin: 0;
     font-size: 14px;
     color: #666;
 }
 
 @media (max-width: 768px) {
-    .summary-cards,
-    .charts-container,
     .item-list {
         grid-template-columns: 1fr;
     }

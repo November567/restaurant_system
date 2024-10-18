@@ -10,297 +10,59 @@
     <title>Restaurant Dashboard</title>
     {% endblock %}
     {% block css %}
+    <link rel="stylesheet" href="{% static 'style_reporting.css' %}">
     <link rel="stylesheet" href="{% static 'style_kitchen.css' %}">
-    <link rel="stylesheet" href="{% static 'style_menu_management.css' %}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">  <!-- sidebar is different due to this line na -->
-
     {% endblock %}
-    <style>
-        .stat-card {
-            transition: transform 0.2s;
-        }
-
-        .stat-card:hover {
-            transform: translateY(-5px);
-        }
-
-        .status-badge {
-            width: 80px;
-        }
-
-        .chart-container {
-            height: 300px;
-        }
-    </style>
+    
 </head>
 
 <body>
-    <div class="content">
+    <div class="reporting-container">
         {% block content %}
-        <div class="container-fluid py-4">
-            <!-- Header Stats -->
-            <div class="row g-4 mb-4">
-                <!-- Daily Revenue -->
-                <div class="col-md-3">
-                    <div class="card stat-card h-100 border-0 shadow-sm">
-                        <div class="card-body">
-                            <div class="d-flex align-items-center">
-                                <div class="rounded-circle bg-primary bg-opacity-10 p-3 me-3">
-                                    <i class="fas fa-dollar-sign text-primary"></i>
-                                </div>
-                                <div>
-                                    <h6 class="card-subtitle mb-1 text-muted">Daily Revenue</h6>
-                                    <h3 class="card-title mb-0">$2,450</h3>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+        <header class="reporting-header">
+            <h1>Reporting and Analytics</h1>
+            <select id="dateRangeSelect" class="date-range">
+                <option value="today">Today</option>
+                <option value="week">This Week</option>
+                <option value="month">This Month</option>
+                <option value="year">This Year</option>
+            </select>
+        </header>
+        <main class="reporting-main">
+            <section class="summary-cards">
+                <div class="summary-card">
+                    <h3>Total Orders</h3>
+                    <p id="totalOrders" class="summary-value"></p>
                 </div>
-
-                <!-- Active Orders -->
-                <div class="col-md-3">
-                    <div class="card stat-card h-100 border-0 shadow-sm">
-                        <div class="card-body">
-                            <div class="d-flex align-items-center">
-                                <div class="rounded-circle bg-success bg-opacity-10 p-3 me-3">
-                                    <i class="fas fa-shopping-bag text-success"></i>
-                                </div>
-                                <div>
-                                    <h6 class="card-subtitle mb-1 text-muted">Active Orders</h6>
-                                    <h3 class="card-title mb-0">8</h3>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                <div class="summary-card">
+                    <h3>Total Revenue</h3>
+                    <p id="totalRevenue" class="summary-value"></p>
                 </div>
-
-                <!-- Average Time -->
-                <div class="col-md-3">
-                    <div class="card stat-card h-100 border-0 shadow-sm">
-                        <div class="card-body">
-                            <div class="d-flex align-items-center">
-                                <div class="rounded-circle bg-warning bg-opacity-10 p-3 me-3">
-                                    <i class="fas fa-clock text-warning"></i>
-                                </div>
-                                <div>
-                                    <h6 class="card-subtitle mb-1 text-muted">Avg Order Time</h6>
-                                    <h3 class="card-title mb-0">24m</h3>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                <div class="summary-card">
+                    <h3>Avg. Order Value</h3>
+                    <p id="avgOrderValue" class="summary-value"></p>
                 </div>
-
-                <!-- Tables Status -->
-                <div class="col-md-3">
-                    <div class="card stat-card h-100 border-0 shadow-sm">
-                        <div class="card-body">
-                            <div class="d-flex align-items-center">
-                                <div class="rounded-circle bg-info bg-opacity-10 p-3 me-3">
-                                    <i class="fas fa-users text-info"></i>
-                                </div>
-                                <div>
-                                    <h6 class="card-subtitle mb-1 text-muted">Tables Occupied</h6>
-                                    <h3 class="card-title mb-0">6/12</h3>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+            </section>
+            <section class="charts-container">
+                <div class="chart-box">
+                    <h2>Revenue Trend</h2>
+                    <canvas id="revenueChart"></canvas>
                 </div>
-            </div>
-
-            <!-- Main Content -->
-            <ul class="nav nav-tabs mb-4" id="dashboardTabs" role="tablist">
-                <li class="nav-item" role="presentation">
-                    <button class="nav-link active" id="overview-tab" data-bs-toggle="tab" data-bs-target="#overview"
-                        type="button">Overview</button>
-                </li>
-                <li class="nav-item" role="presentation">
-                    <button class="nav-link" id="tables-tab" data-bs-toggle="tab" data-bs-target="#tables"
-                        type="button">Tables</button>
-                </li>
-                <li class="nav-item" role="presentation">
-                    <button class="nav-link" id="orders-tab" data-bs-toggle="tab" data-bs-target="#orders"
-                        type="button">Orders</button>
-                </li>
-            </ul>
-
-            <div class="tab-content" id="dashboardTabsContent">
-                <!-- Overview Tab -->
-                <div class="tab-pane fade show active" id="overview">
-                    <div class="row g-4">
-                        <!-- Revenue Chart -->
-                        <div class="col-md-8">
-                            <div class="card border-0 shadow-sm">
-                                <div class="card-header bg-white border-0">
-                                    <h5 class="card-title mb-0">Weekly Revenue</h5>
-                                </div>
-                                <div class="card-body">
-                                    <div class="chart-container" id="revenueChart"></div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Popular Items -->
-                        <div class="col-md-4">
-                            <div class="card border-0 shadow-sm">
-                                <div class="card-header bg-white border-0">
-                                    <h5 class="card-title mb-0">Popular Items</h5>
-                                </div>
-                                <div class="card-body">
-                                    <div class="list-group list-group-flush">
-                                        <div class="list-group-item">
-                                            <div class="d-flex justify-content-between align-items-center">
-                                                <h6 class="mb-0">Burger</h6>
-                                                <span class="badge bg-primary rounded-pill">45 orders</span>
-                                            </div>
-                                            <div class="progress mt-2" style="height: 5px;">
-                                                <div class="progress-bar" style="width: 100%"></div>
-                                            </div>
-                                        </div>
-                                        <div class="list-group-item">
-                                            <div class="d-flex justify-content-between align-items-center">
-                                                <h6 class="mb-0">Pizza</h6>
-                                                <span class="badge bg-primary rounded-pill">38 orders</span>
-                                            </div>
-                                            <div class="progress mt-2" style="height: 5px;">
-                                                <div class="progress-bar" style="width: 84%"></div>
-                                            </div>
-                                        </div>
-                                        <div class="list-group-item">
-                                            <div class="d-flex justify-content-between align-items-center">
-                                                <h6 class="mb-0">Pasta</h6>
-                                                <span class="badge bg-primary rounded-pill">32 orders</span>
-                                            </div>
-                                            <div class="progress mt-2" style="height: 5px;">
-                                                <div class="progress-bar" style="width: 71%"></div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                <div class="chart-box">
+                    <h2>Item Performance</h2>
+                    <canvas id="itemPerformanceChart"></canvas>
                 </div>
-
-                <!-- Tables Tab -->
-                <div class="tab-pane fade" id="tables">
-                    <div class="card border-0 shadow-sm">
-                        <div class="card-header bg-white border-0">
-                            <h5 class="card-title mb-0">Table Status</h5>
-                        </div>
-                        <div class="card-body">
-                            <div class="row g-4">
-                                <!-- Table Card -->
-                                <div class="col-md-3">
-                                    <div class="card">
-                                        <div class="card-body">
-                                            <div class="d-flex justify-content-between align-items-center">
-                                                <h5 class="card-title mb-0">Table 1</h5>
-                                                <span class="badge bg-success status-badge">Available</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-3">
-                                    <div class="card">
-                                        <div class="card-body">
-                                            <div class="d-flex justify-content-between align-items-center">
-                                                <h5 class="card-title mb-0">Table 2</h5>
-                                                <span class="badge bg-danger status-badge">Occupied</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-3">
-                                    <div class="card">
-                                        <div class="card-body">
-                                            <div class="d-flex justify-content-between align-items-center">
-                                                <h5 class="card-title mb-0">Table 3</h5>
-                                                <span class="badge bg-warning status-badge">Reserved</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Orders Tab -->
-                <div class="tab-pane fade" id="orders">
-                    <div class="card border-0 shadow-sm">
-                        <div class="card-header bg-white border-0">
-                            <h5 class="card-title mb-0">Active Orders</h5>
-                        </div>
-                        <div class="card-body">
-                            <div class="list-group">
-                                <div class="list-group-item">
-                                    <div class="d-flex justify-content-between align-items-center">
-                                        <div>
-                                            <h6 class="mb-1">Order #1234</h6>
-                                            <small class="text-muted">Table 2 • 3 items</small>
-                                        </div>
-                                        <span class="badge bg-warning">In Progress</span>
-                                    </div>
-                                </div>
-                                <div class="list-group-item">
-                                    <div class="d-flex justify-content-between align-items-center">
-                                        <div>
-                                            <h6 class="mb-1">Order #1235</h6>
-                                            <small class="text-muted">Table 4 • 2 items</small>
-                                        </div>
-                                        <span class="badge bg-info">Pending</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        {% endblock %}
+            </section>
+            <section class="top-selling">
+                <h2>Top Selling Items</h2>
+                <ul id="topSellingList" class="item-list"></ul>
+            </section>
+        </main>
     </div>
-
-    <!-- Scripts -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.0/chart.min.js"></script>
-    <script>
-        // Initialize revenue chart
-        const ctx = document.createElement('canvas');
-        document.getElementById('revenueChart').appendChild(ctx);
-        new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
-                datasets: [{
-                    label: 'Revenue',
-                    data: [1500, 2200, 1800, 2400, 3100, 3800, 2900],
-                    borderColor: '#0d6efd',
-                    tension: 0.4
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        display: false
-                    }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        ticks: {
-                            callback: value => '$' + value
-                        }
-                    }
-                }
-            }
-        });
-    </script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="{% static 'reporting.js' %}"></script>
+    {% endblock %}
 </body>
 
 </html>

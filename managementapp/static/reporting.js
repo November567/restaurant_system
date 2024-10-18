@@ -45,7 +45,7 @@ document.addEventListener('DOMContentLoaded', function () {
             })
             .catch(error => {
                 console.error('Error fetching dashboard data:', error);
-                showErrorMessage('Failed to load dashboard data. Please try again later.');
+                showErrorMessage('No data.');
             });
     }
     function showErrorMessage(message) {
@@ -70,9 +70,9 @@ document.addEventListener('DOMContentLoaded', function () {
         // Update summary cards
         document.getElementById('totalOrders').textContent = data.totalOrders;
         document.getElementById('totalRevenue').textContent =
-            `฿${data.totalRevenue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-        document.getElementById('avgOrderValue').textContent =
-            `฿${data.avgOrderValue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+            `฿${parseFloat(data.totalRevenue).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
+        document.getElementById('preparationTime').textContent = data.preparation_time_data;
 
         // Update charts
         updateRevenueChart(data.revenueData);
@@ -81,6 +81,7 @@ document.addEventListener('DOMContentLoaded', function () {
         // Update top selling items
         updateTopSellingItems(topSellingItems);
     }
+
 
     function updateRevenueChart(data) {
         const ctx = document.getElementById('revenueChart').getContext('2d');
@@ -159,11 +160,11 @@ document.addEventListener('DOMContentLoaded', function () {
     function updateTopSellingItems(topSellingItems) {
         const topSellingList = document.getElementById('topSellingList');
         topSellingList.innerHTML = '';
-    
+
         topSellingItems.forEach(item => {
             const imageUrl = item.image || 'path/to/default/image.png';
             console.log(imageUrl);  // Check if the correct URL is logged
-    
+
             const li = document.createElement('li');
             li.innerHTML = `
                 <div class="item-image">
@@ -181,11 +182,10 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
     
-
-    // Set up the date range selector
     const dateRangeSelect = document.getElementById('dateRangeSelect');
     dateRangeSelect.addEventListener('change', function () {
-        fetchDashboardData(this.value);
+        const selectedDateRange = this.value;
+        fetchDashboardData(selectedDateRange);
     });
 
     // Initial load

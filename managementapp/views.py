@@ -378,6 +378,13 @@ def user_register(request):
 
     return render(request, "managementapp/register.html")
 
+def format_duration(duration):
+    """Convert ISO 8601 duration to hh:mm:ss format."""
+    total_seconds = duration.total_seconds()
+    hours, remainder = divmod(total_seconds, 3600)
+    minutes, seconds = divmod(remainder, 60)
+    return f'{int(hours):02}:{int(minutes):02}:{int(seconds):02}'
+
 
 def dashboard(request):
     if request.headers.get('x-requested-with') == 'XMLHttpRequest':
@@ -412,6 +419,12 @@ def dashboard(request):
             )
         ).aggregate(avg_preparation_time=Avg("preparation_time"))
 
+        avg_preparation_time = preparation_time_data['avg_preparation_time']
+        if avg_preparation_time:
+            avg_preparation_time = format_duration(avg_preparation_time)  # Convert to hh:mm:ss
+        else:
+            avg_preparation_time = 'N/A'
+
         # Revenue data over time
         revenue_data = (
             Payment.objects.annotate(date=F("paid_at__date"))
@@ -431,7 +444,7 @@ def dashboard(request):
         dashboard_data = {
             "totalOrders": total_orders,
             "totalRevenue": total_revenue,
-            "avgOrderValue": avg_order_value,
+            "preparation_time_data": avg_preparation_time,
             "revenueData": list(revenue_data),
         }
 

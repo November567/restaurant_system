@@ -63,11 +63,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
     const topSellingItems = [
         { name: 'Papaya Salad', sold: 50, image: 'papaya-salad.jpg' },
-        { name: 'Pad Thai', sold: 42, image: 'pad-thai.jpg' },
-        { name: 'Green Curry', sold: 35, image: 'green-curry.jpg' },
-        { name: 'Mango Sticky Rice', sold: 30, image: 'mango-sticky-rice.jpg' },
-        { name: 'Mango Sticky Rice', sold: 30, image: 'mango-sticky-rice.jpg' },
-        { name: 'Mango Sticky Rice', sold: 30, image: 'mango-sticky-rice.jpg' }
+        { name: 'Pad Thai', sold: 42, image: '' },
+        { name: 'Green Curry', sold: 35, image: '' },
+        { name: 'Mango Sticky Rice', sold: 30, image: '' },
+        { name: 'Mango Sticky Rice', sold: 30, image: '' },
+        { name: 'Mango Sticky Rice', sold: 30, image: '' }
     ];
 
     let revenueChart, itemPerformanceChart;

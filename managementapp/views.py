@@ -10,6 +10,8 @@ from django.views.decorators.csrf import csrf_exempt
 from .models import Table, MenuItem, Order, OrderItem
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.forms import AuthenticationForm
+from django.db.models import Sum, F, FloatField, ExpressionWrapper, DurationField, Avg
+from django.templatetags.static import static
 from django.contrib import messages
 from django.contrib.auth.models import User
 from .forms import MenuItemForm
@@ -18,7 +20,7 @@ import json
 
 def menu_list(request, table_id, order_id=None):
     table = get_object_or_404(Table, pk=table_id)
-    
+
     menu_items = MenuItem.objects.filter(available=True)
     categories = {
         "Recommend": menu_items.filter(recommend=True),
@@ -27,11 +29,11 @@ def menu_list(request, table_id, order_id=None):
         "Drink": menu_items.filter(category="Drink"),
         "Dessert": menu_items.filter(category="Dessert"),
     }
-    
+
     current_order = None
     if order_id:
         current_order = get_object_or_404(Order, pk=order_id)
-    
+
     return render(
         request,
         "managementapp/menu_list.html",
@@ -46,10 +48,10 @@ def food_order(request, item_id, table_id, order_id=None, order_item_id=None):
         table = get_object_or_404(Table, pk=table_id)
         current_order = None
         current_order_item = None
-        
+
         if order_id:
             current_order = get_object_or_404(Order, pk=order_id)
-        
+
         if order_item_id:
             current_order_item = get_object_or_404(OrderItem, pk=order_item_id)
 
@@ -57,65 +59,69 @@ def food_order(request, item_id, table_id, order_id=None, order_item_id=None):
             with transaction.atomic():
                 quantity = int(request.POST.get("quantity", 1))
                 special_requests = request.POST.get("special_requests", "")
-                total_price = request.POST.get('total_price', 0)
+                total_price = request.POST.get("total_price", 0)
                 size = request.POST.get("size", "")
 
-                order = current_order or Order.objects.create(table=table, status="Pending")
+                order = current_order or Order.objects.create(
+                    table=table, status="Pending"
+                )
 
                 if current_order_item:
                     current_order_item.quantity = quantity
                     current_order_item.special_requests = special_requests
                     current_order_item.size = size
-                    current_order_item.total_price = total_price 
+                    current_order_item.total_price = total_price
                     current_order_item.save()
                 else:
                     OrderItem.objects.create(
-                        order=order,  
+                        order=order,
                         menu_item=menu_item,
                         special_requests=special_requests,
                         quantity=quantity,
                         size=size,
-                        total_price = total_price 
+                        total_price=total_price,
                     )
 
-                from_payment = request.POST.get('from_payment', 'false')
-                
-                if from_payment == 'true':
-                    redirect_url = reverse('payment_page', kwargs={'order_id': order.id})
+                from_payment = request.POST.get("from_payment", "false")
+
+                if from_payment == "true":
+                    redirect_url = reverse(
+                        "payment_page", kwargs={"order_id": order.id}
+                    )
                 else:
-                    redirect_url = reverse('menu_list', kwargs={'table_id': table.id, 'order_id': order.id})
+                    redirect_url = reverse(
+                        "menu_list", kwargs={"table_id": table.id, "order_id": order.id}
+                    )
 
-                return JsonResponse({
-                    'success': True,
-                    'redirect_url': redirect_url
-                })
+                return JsonResponse({"success": True, "redirect_url": redirect_url})
 
-        from_payment = request.GET.get('from_payment', 'false')
+        from_payment = request.GET.get("from_payment", "false")
 
         return render(
             request,
             "managementapp/food_detail.html",
             {
-                "menu_item": menu_item, 
-                "table": table, 
-                "current_order": current_order, 
-                "current_order_item": current_order_item, 
+                "menu_item": menu_item,
+                "table": table,
+                "current_order": current_order,
+                "current_order_item": current_order_item,
                 "from_payment": from_payment,
-                "quantity": current_order_item.quantity if current_order_item else 1, 
-                "special_requests": current_order_item.special_requests if current_order_item else "", 
-                "size": current_order_item.size if current_order_item else "S",  
-            }
+                "quantity": current_order_item.quantity if current_order_item else 1,
+                "special_requests": (
+                    current_order_item.special_requests if current_order_item else ""
+                ),
+                "size": current_order_item.size if current_order_item else "S",
+            },
         )
     except Exception as e:
         # Log the error for debugging
         import logging
+
         logging.error(f"Error in food_order view: {str(e)}")
-        
+
         # Return a JSON response with error details
-        return JsonResponse({
-            'success': False,
-            'error': str(e)
-        }, status=500)
+        return JsonResponse({"success": False, "error": str(e)}, status=500)
+
 
 @login_required
 def menu_items_api(request):
@@ -137,9 +143,9 @@ def menu_items_api(request):
 
 @login_required
 def menu_management(request):
-    menu_items = MenuItem.objects.all() 
+    menu_items = MenuItem.objects.all()
     context = {
-        "menu_items": menu_items, 
+        "menu_items": menu_items,
     }
     return render(request, "managementapp/menu_management.html", context)
 
@@ -149,13 +155,11 @@ def add_product(request):
     if request.method == "POST":
         form = MenuItemForm(request.POST, request.FILES)
         if form.is_valid():
-            if form.cleaned_data["image"]: 
+            if form.cleaned_data["image"]:
                 form.save()
-                return redirect("menu_management") 
+                return redirect("menu_management")
             else:
-                form.add_error(
-                    "image", "Please upload an image."
-                )
+                form.add_error("image", "Please upload an image.")
         else:
             print(form.errors)
     else:
@@ -238,33 +242,35 @@ def kitchen_display(request):
     pending_orders.update(status="In Progress")
 
     orders = {
-        'in_progress': in_progress_orders,
+        "in_progress": in_progress_orders,
     }
 
     return render(request, "managementapp/kitchen.html", {"orders": orders})
+
 
 @login_required
 def completed_kitchen_display(request):
     completed_orders = Order.objects.filter(status="Completed")
     orders = {
-        'completed': completed_orders,
+        "completed": completed_orders,
     }
 
     return render(request, "managementapp/completed_kitchen.html", {"orders": orders})
 
 
-@csrf_exempt  
+@csrf_exempt
 def complete_order(request, order_id):
-    if request.method == 'POST':
+    if request.method == "POST":
         try:
             order = Order.objects.get(id=order_id)
             order.status = "Completed"
             order.completed_at = timezone.now()
             order.save()
-            return JsonResponse({'success': True})
+            return JsonResponse({"success": True})
         except Order.DoesNotExist:
-            return JsonResponse({'success': False, 'error': 'Order not found.'})
-    return JsonResponse({'success': False, 'error': 'Invalid request method.'})
+            return JsonResponse({"success": False, "error": "Order not found."})
+    return JsonResponse({"success": False, "error": "Invalid request method."})
+
 
 def get_order_details(request, order_id):
     order = get_object_or_404(Order, id=order_id)
@@ -272,31 +278,34 @@ def get_order_details(request, order_id):
     order_items = order.orderitem_set.all()
 
     context = {
-        'order': order,
-        'order_items': order_items,
+        "order": order,
+        "order_items": order_items,
     }
 
-    return render(request, 'managementapp/order_detail.html', context)
+    return render(request, "managementapp/order_detail.html", context)
+
 
 def process_payment(request, order_id):
     order = get_object_or_404(Order, pk=order_id)
     if request.method == "POST":
-        payment_method = request.POST.get('payment_method')  
+        payment_method = request.POST.get("payment_method")
         amount = sum(item.total_price for item in order.orderitem_set.all())
 
         Payment.objects.create(
             order=order,
             amount=amount,
             payment_method=payment_method,
+            paid_at=timezone.now()
         )
 
-        order.status = 'Pending'
+        order.status = "Pending"
         order.created_at = timezone.now()
         order.save()
 
-        return redirect('menu_list', table_id=order.table.id)  
+        return redirect("menu_list", table_id=order.table.id)
 
     return render(request, "managementapp/payment.html", {"order": order})
+
 
 @login_required
 def dashboard(request):
@@ -306,60 +315,150 @@ def dashboard(request):
     payments = Payment.objects.all()
 
     context = {
-        'tables': tables,
-        'menu_items': menu_items,
-        'orders': orders,
-        'payments': payments,
+        "tables": tables,
+        "menu_items": menu_items,
+        "orders": orders,
+        "payments": payments,
     }
-    return render(request, 'managementapp/dashboard.html', context)
+    return render(request, "managementapp/dashboard.html", context)
+
 
 def user_logout(request):
     logout(request)
-    return redirect('login')
+    return redirect("login")
+
 
 def user_login(request):
-    if request.method == 'POST':
+    if request.method == "POST":
         form = AuthenticationForm(request, data=request.POST)
         if form.is_valid():
-            username = form.cleaned_data.get('username')
-            password = form.cleaned_data.get('password')
+            username = form.cleaned_data.get("username")
+            password = form.cleaned_data.get("password")
             user = authenticate(username=username, password=password)
             if user is not None:
                 login(request, user)
-                return redirect('kitchen_display')
+                return redirect("kitchen_display")
             else:
-                messages.error(request, 'Invalid credentials')
+                messages.error(request, "Invalid credentials")
         else:
-            messages.error(request, 'Invalid credentials')
-    return render(request, 'managementapp/login.html')
+            messages.error(request, "Invalid credentials")
+    return render(request, "managementapp/login.html")
+
 
 def user_register(request):
-    if request.method == 'POST':
-        username = request.POST.get('username')
-        password = request.POST.get('password')
-        confirm_password = request.POST.get('confirmPassword')
-        email = request.POST.get('email')
+    if request.method == "POST":
+        username = request.POST.get("username")
+        password = request.POST.get("password")
+        confirm_password = request.POST.get("confirmPassword")
+        email = request.POST.get("email")
 
         if not username or not password or not confirm_password or not email:
             messages.error(request, "All fields are required")
-            return render(request, 'managementapp/register.html')
+            return render(request, "managementapp/register.html")
 
         if password != confirm_password:
             messages.error(request, "Passwords do not match")
-            return render(request, 'managementapp/register.html')
+            return render(request, "managementapp/register.html")
 
         if User.objects.filter(username=username).exists():
             messages.error(request, "Username is already taken")
-            return render(request, 'managementapp/register.html')
+            return render(request, "managementapp/register.html")
 
         if User.objects.filter(email=email).exists():
             messages.error(request, "Email is already registered")
-            return render(request, 'managementapp/register.html')
+            return render(request, "managementapp/register.html")
 
-        user = User.objects.create_user(username=username, password=password, email=email)
+        user = User.objects.create_user(
+            username=username, password=password, email=email
+        )
         user.save()
 
         messages.success(request, "Account created successfully")
-        return redirect('login') 
+        return redirect("login")
 
-    return render(request, 'managementapp/register.html')
+    return render(request, "managementapp/register.html")
+
+def format_duration(duration):
+    """Convert ISO 8601 duration to hh:mm:ss format."""
+    total_seconds = duration.total_seconds()
+    hours, remainder = divmod(total_seconds, 3600)
+    minutes, seconds = divmod(remainder, 60)
+    return f'{int(hours):02}:{int(minutes):02}:{int(seconds):02}'
+
+
+def dashboard(request):
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        # Get the period filter from the query string (e.g., 'today', 'week', 'month')
+        period = request.GET.get("period", "today")
+
+        # Filter orders based on the selected period
+        if period == "today":
+            start_date = timezone.now().replace(hour=0, minute=0, second=0)
+        elif period == "week":
+            start_date = timezone.now() - timezone.timedelta(days=7)
+        elif period == "month":
+            start_date = timezone.now().replace(day=1)
+        else:
+            start_date = None
+
+        # Filter orders and payments based on the period
+        orders = (
+            Order.objects.filter(created_at__gte=start_date)
+            if start_date
+            else Order.objects.all()
+        )
+        payments = Payment.objects.filter(order__in=orders)
+
+        # Calculate total orders, total revenue, and average order value
+        total_orders = orders.count()
+        total_revenue = payments.aggregate(total=Sum("amount"))["total"] or 0
+        avg_order_value = round(total_revenue / total_orders, 2) if total_orders else 0
+        preparation_time_data = Order.objects.annotate(
+            preparation_time=ExpressionWrapper(
+                F("completed_at") - F("created_at"), output_field=DurationField()
+            )
+        ).aggregate(avg_preparation_time=Avg("preparation_time"))
+
+        avg_preparation_time = preparation_time_data['avg_preparation_time']
+        if avg_preparation_time:
+            avg_preparation_time = format_duration(avg_preparation_time)  # Convert to hh:mm:ss
+        else:
+            avg_preparation_time = 'N/A'
+
+        # Revenue data over time
+        revenue_data = (
+            Payment.objects.annotate(date=F("paid_at__date"))
+            .values("date")
+            .annotate(revenue=Sum("amount", output_field=FloatField()))
+            .order_by("date")
+        )
+
+        # Top-selling items
+        top_selling_items = (
+            OrderItem.objects.values("menu_item__name", "menu_item__image")
+            .annotate(sold=Sum("quantity"))
+            .order_by("-sold")[:5]
+        )
+
+        # Prepare data for the frontend
+        dashboard_data = {
+            "totalOrders": total_orders,
+            "totalRevenue": total_revenue,
+            "preparation_time_data": avg_preparation_time,
+            "revenueData": list(revenue_data),
+        }
+
+        top_selling = [
+            {
+                "name": item["menu_item__name"],
+                "sold": item["sold"],
+                "image": item["menu_item__image"],
+            }
+            for item in top_selling_items
+        ]
+
+        # Return JSON response
+        return JsonResponse(
+            {"dashboardData": dashboard_data, "topSellingItems": top_selling}
+        )
+    return render(request, 'managementapp/dashboard.html')

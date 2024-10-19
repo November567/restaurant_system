@@ -66,8 +66,7 @@
 
                     {% if form.image.value %}
                     <div class="current-image">
-                        <p>Current Image:</p>
-                        <img src="{{ form.image.value.url }}" alt="Current product image" class="product-image-preview">
+                        <img src="{{ form.image.value.url }}" alt="Current product image" class="product-image-preview" style="width: 200px; height: 200px;">
                     </div>
                     {% endif %}
 

@@ -86,15 +86,15 @@ body {
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
     position: relative;
     width: 100%; 
-    min-height: 200px;
-    max-height: 200px;
+    min-height: 300px;
+    max-height: 400px;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
 }
 
 .order-card .order-items {
-    max-height: 80px;
+    max-height: 200px;
     overflow-y: auto;
     list-style: none;
     margin-bottom: 15px;

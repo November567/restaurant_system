@@ -66,14 +66,8 @@ def food_order(request, item_id, table_id, order_id=None, order_item_id=None):
                     table=table, status="Pending"
                 )
 
-                if current_order_item:
-                    current_order_item.quantity = quantity
-                    current_order_item.special_requests = special_requests
-                    current_order_item.size = size
-                    current_order_item.total_price = total_price
-                    current_order_item.save()
-                else:
-                    OrderItem.objects.create(
+
+                OrderItem.objects.create(
                         order=order,
                         menu_item=menu_item,
                         special_requests=special_requests,
@@ -82,14 +76,8 @@ def food_order(request, item_id, table_id, order_id=None, order_item_id=None):
                         total_price=total_price,
                     )
 
-                from_payment = request.POST.get("from_payment", "false")
 
-                if from_payment == "true":
-                    redirect_url = reverse(
-                        "payment_page", kwargs={"order_id": order.id}
-                    )
-                else:
-                    redirect_url = reverse(
+                redirect_url = reverse(
                         "menu_list", kwargs={"table_id": table.id, "order_id": order.id}
                     )
 
@@ -462,3 +450,58 @@ def dashboard(request):
             {"dashboardData": dashboard_data, "topSellingItems": top_selling}
         )
     return render(request, 'managementapp/dashboard.html')
+
+@require_http_methods(["GET", "POST"])
+def edit_food_order(request, item_id, table_id, order_id, order_item_id):
+    try:
+        menu_item = get_object_or_404(MenuItem, pk=item_id)
+        table = get_object_or_404(Table, pk=table_id)
+        current_order = get_object_or_404(Order, pk=order_id)
+        current_order_item = get_object_or_404(OrderItem, pk=order_item_id)
+
+        if request.method == "POST":
+            with transaction.atomic():
+                try:
+                    quantity = int(request.POST.get("quantity", 1))
+                    special_requests = request.POST.get("special_requests", "")
+                    total_price = float(request.POST.get("total_price", 0))
+                    size = request.POST.get("size", "")  
+                    
+                    current_order_item.quantity = quantity
+                    current_order_item.special_requests = special_requests
+                    current_order_item.size = size
+                    current_order_item.total_price = total_price
+                    current_order_item.save()
+
+                    redirect_url = reverse("payment_page", kwargs={"order_id": current_order.id})
+                    return JsonResponse({"success": True, "redirect_url": redirect_url})
+                
+                except Exception as e:
+                    return JsonResponse({"success": False, "error": str(e)})
+
+        from_payment = request.GET.get("from_payment", "false")
+
+        return render(
+            request,
+            "managementapp/edit_food_detail.html",
+            {
+                "menu_item": menu_item,
+                "table": table,
+                "current_order": current_order,
+                "current_order_item": current_order_item,
+                "from_payment": from_payment,
+                "quantity": current_order_item.quantity if current_order_item else 1,
+                "special_requests": (
+                    current_order_item.special_requests if current_order_item else ""
+                ),
+                "size": current_order_item.size if current_order_item else "S",
+            },
+        )
+    except Exception as e:
+        # Log the error for debugging
+        import logging
+
+        logging.error(f"Error in food_order view: {str(e)}")
+
+        # Return a JSON response with error details
+        return JsonResponse({"success": False, "error": str(e)}, status=500)

@@ -160,21 +160,15 @@ document.addEventListener('DOMContentLoaded', function () {
     function updateTopSellingItems(topSellingItems) {
         const topSellingList = document.getElementById('topSellingList');
         topSellingList.innerHTML = '';
-
-        topSellingItems.forEach(item => {
+    
+        topSellingItems.forEach((item, index) => {
             const imageUrl = item.image || 'path/to/default/image.png';
             console.log(imageUrl);  // Check if the correct URL is logged
-
+    
             const li = document.createElement('li');
             li.innerHTML = `
-                <div class="item-image">
-                    <img src="${imageUrl}" 
-                         alt="${item.name}" 
-                         width="50" 
-                         height="50">
-                </div>
                 <div class="item-details">
-                    <h3>${item.name}</h3>
+                    <h3>${index + 1}. ${item.name}</h3>
                     <p>Sold: ${item.sold}</p>
                 </div>
             `;

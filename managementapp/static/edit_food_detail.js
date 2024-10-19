@@ -11,37 +11,31 @@ document.addEventListener('DOMContentLoaded', function () {
 
     const backBtn = document.querySelector('.back-button');
     backBtn.addEventListener('click', function () {
-        const tableId = this.getAttribute('data-table-id');
         const orderId = this.getAttribute('data-order-id');
-
-        if (orderId) {
-            backEditOrder(tableId, orderId);
-        } else {
-            backEdit(tableId);
-        }
+        backEditInpayment(orderId);
     });
 
-    function backEdit(tableId) {
-        window.location.href = `/table/${tableId}`;  // Redirect to menu list page
-    }
-
-    function backEditOrder(tableId, orderId) {
-        window.location.href = `/table/${tableId}/order/${orderId}/`;  // Redirect to the menu list page with order ID
+    function backEditInpayment(orderId) {
+        window.location.href = `/payment/order/${orderId}/`;  // Redirect to the payment page
     }
 
     addToCartBtn.addEventListener('click', function () {
         const orderId = this.getAttribute('data-order-id');
         const tableId = this.getAttribute('data-table-id');
         const fromPayment = sessionStorage.getItem('fromPayment');
-        console.log(orderId)
+        console.log(orderId);
 
         if (fromPayment === 'true') {
             backEditInpayment(orderId);
             sessionStorage.removeItem('fromPayment');
-        } else{
+        } else {
             backEdit(tableId);
-        } 
+        }
     });
+
+    function backEdit(tableId) {
+        window.location.href = `/menu/table/${tableId}/`;  // Redirect to menu based on table
+    }
 
     // Size selection
     sizeOptions.forEach(option => {
@@ -62,11 +56,12 @@ document.addEventListener('DOMContentLoaded', function () {
         updateTotalPrice();
     }
 
-
-    function updateTotalPrice(sizePrice = 0) {
+    function updateTotalPrice() {
         const quantity = parseInt(quantityValue.textContent);
         const selectedSize = document.querySelector('.size-options input:checked');
-        const sizePriceChange = parseInt(selectedSize.parentElement.querySelector('.price-change').textContent.replace('+', ''));
+        const sizePriceChange = selectedSize
+            ? parseInt(selectedSize.parentElement.querySelector('.price-change').textContent.replace('+', ''))
+            : 0;
         const totalPrice = (basePrice + sizePriceChange) * quantity;
         addToCartBtn.textContent = `Add to Cart - ${totalPrice} Baht`;
         return totalPrice;
@@ -76,12 +71,13 @@ document.addEventListener('DOMContentLoaded', function () {
     form.addEventListener('submit', function (event) {
         event.preventDefault();
 
+        const orderId = addToCartBtn.getAttribute('data-order-id');
         const size = document.querySelector('.size-options input:checked').value;
         const quantity = parseInt(quantityValue.textContent);
         const note = document.querySelector('textarea').value;
         const fromPayment = sessionStorage.getItem('fromPayment') || 'false';
 
-        console.log(`Submitting form: Size: ${size}, Quantity: ${quantity}, Note: ${note}`);
+        console.log(`Submitting form: Size: ${size}, Quantity: ${quantity}, Note: ${note}, Order ID: ${orderId}`);
 
         addToCartBtn.disabled = true;
 
@@ -93,6 +89,7 @@ document.addEventListener('DOMContentLoaded', function () {
         formData.append('special_requests', note);
         formData.append('total_price', totalPrice);
         formData.append('from_payment', fromPayment);
+        formData.append('order_id', orderId);  // Ensure order ID is passed
 
         fetch(form.action, {
             method: 'POST',
@@ -104,8 +101,8 @@ document.addEventListener('DOMContentLoaded', function () {
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                console.log(2)
-                window.location.href = data.redirect_url; // Redirect to normal route
+                console.log(`Form submitted successfully: Redirecting to payment for order ID: ${orderId}`);
+                window.location.href = `/payment/order/${orderId}/`;  // Redirect to payment if from payment
             } else {
                 console.error('Form submission failed:', data.error);
             }
@@ -122,6 +119,4 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Initialize total price
     updateTotalPrice();
-
-
 });

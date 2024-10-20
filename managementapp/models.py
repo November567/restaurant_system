@@ -1,11 +1,14 @@
 from django.db import models
 
 class Table(models.Model):
-    number = models.IntegerField(unique=True)
-    status = models.CharField(max_length=20, default="Available")
+    STATUS_CHOICES = [
+        ('Available', 'Available'),
+        ('Unavailable', 'Unavailable'), 
+    ]
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="Available")
 
     def __str__(self):
-        return f"Table {self.number} - {self.status}"
+        return f"Table number {self.id} - {self.status}"
 
 
 class MenuItem(models.Model):

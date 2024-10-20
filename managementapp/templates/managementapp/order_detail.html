@@ -127,7 +127,7 @@
             <br>
             <div class="order-info">
                 <p><strong>Status:</strong> {{ order.status }}</p>
-                <p><strong>Table:</strong> {{ order.table.number }}</p>
+                <p><strong>Table:</strong> {{ order.table.id }}</p>
                 <p><strong>Created at:</strong> {{ order.created_at }}</p>
                 <p><strong>Completed at:</strong> {% if order.completed_at %}{{ order.completed_at }}{% else %}Not completed yet{% endif %}</p>
             </div>

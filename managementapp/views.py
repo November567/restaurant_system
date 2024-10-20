@@ -20,6 +20,8 @@ import json
 
 def menu_list(request, table_id, order_id=None):
     table = get_object_or_404(Table, pk=table_id)
+    if table.status == "Unavailable":
+        return render(request, "managementapp/error_menu.html", {"error_message": "This table is unavailable."})
 
     menu_items = MenuItem.objects.filter(available=True)
     categories = {

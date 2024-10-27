@@ -57,7 +57,7 @@ class Order(models.Model):
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="Pending")
 
     def __str__(self):
-        return f"Order {self.id} for Table {self.table.number} - {self.status}"
+        return f"Order {self.id} for Table {self.table.id} - {self.status}"
 
 
 class Payment(models.Model):

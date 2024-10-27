@@ -19,24 +19,6 @@ document.addEventListener('DOMContentLoaded', function () {
         window.location.href = `/payment/order/${orderId}/`;  // Redirect to the payment page
     }
 
-    addToCartBtn.addEventListener('click', function () {
-        const orderId = this.getAttribute('data-order-id');
-        const tableId = this.getAttribute('data-table-id');
-        const fromPayment = sessionStorage.getItem('fromPayment');
-        console.log(orderId);
-
-        if (fromPayment === 'true') {
-            backEditInpayment(orderId);
-            sessionStorage.removeItem('fromPayment');
-        } else {
-            backEdit(tableId);
-        }
-    });
-
-    function backEdit(tableId) {
-        window.location.href = `/menu/table/${tableId}/`;  // Redirect to menu based on table
-    }
-
     // Size selection
     sizeOptions.forEach(option => {
         option.addEventListener('change', function () {
@@ -51,7 +33,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     function updateQuantity(change) {
         let currentQuantity = parseInt(quantityValue.textContent);
-        currentQuantity = Math.max(1, currentQuantity + change);
+        currentQuantity = Math.max(0, currentQuantity + change);
         quantityValue.textContent = currentQuantity;
         updateTotalPrice();
     }
@@ -63,7 +45,11 @@ document.addEventListener('DOMContentLoaded', function () {
             ? parseInt(selectedSize.parentElement.querySelector('.price-change').textContent.replace('+', ''))
             : 0;
         const totalPrice = (basePrice + sizePriceChange) * quantity;
-        addToCartBtn.textContent = `Add to Cart - ${totalPrice} Baht`;
+        if (quantity === 0) {
+            addToCartBtn.textContent = `Delete`;
+        } else {
+            addToCartBtn.textContent = `Add to Cart - ${totalPrice} Baht`;
+        }
         return totalPrice;
     }
 
@@ -71,6 +57,7 @@ document.addEventListener('DOMContentLoaded', function () {
     form.addEventListener('submit', function (event) {
         event.preventDefault();
 
+        //const tableId = addToCartBtn.getAttribute('data-table-id');
         const orderId = addToCartBtn.getAttribute('data-order-id');
         const size = document.querySelector('.size-options input:checked').value;
         const quantity = parseInt(quantityValue.textContent);
@@ -84,6 +71,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
         const formData = new FormData(form);
         const totalPrice = updateTotalPrice();
+
         formData.append('size', size);
         formData.append('quantity', quantity);
         formData.append('special_requests', note);
@@ -101,8 +89,7 @@ document.addEventListener('DOMContentLoaded', function () {
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                console.log(`Form submitted successfully: Redirecting to payment for order ID: ${orderId}`);
-                window.location.href = `/payment/order/${orderId}/`;  // Redirect to payment if from payment
+                window.location.href = data.redirect_url;  // Redirect to payment if from payment
             } else {
                 console.error('Form submission failed:', data.error);
             }

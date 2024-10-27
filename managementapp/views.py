@@ -65,27 +65,31 @@ def food_order(request, item_id, table_id, order_id=None, order_item_id=None):
                 size = request.POST.get("size", "")
 
                 order = current_order or Order.objects.create(
-                    table=table, status="Pending"
-                )
-
-
-                OrderItem.objects.create(
-                        order=order,
-                        menu_item=menu_item,
-                        special_requests=special_requests,
-                        quantity=quantity,
-                        size=size,
-                        total_price=total_price,
+                        table=table, status="Pending"
                     )
+                if quantity == 0:
+                    if not order.orderitem_set.exists():  
+                        order.delete()  
+                        redirect_url = reverse("menu_list", kwargs={"table_id": table.id})  
+                    else:
+                        redirect_url = reverse("menu_list", kwargs={"table_id": table.id, "order_id": order.id})
+                else:
+                    OrderItem.objects.create(
+                            order=order,
+                            menu_item=menu_item,
+                            special_requests=special_requests,
+                            quantity=quantity,
+                            size=size,
+                            total_price=total_price,
+                        )
 
 
-                redirect_url = reverse(
-                        "menu_list", kwargs={"table_id": table.id, "order_id": order.id}
-                    )
+                    redirect_url = reverse(
+                            "menu_list", kwargs={"table_id": table.id, "order_id": order.id}
+                        )
 
                 return JsonResponse({"success": True, "redirect_url": redirect_url})
 
-        from_payment = request.GET.get("from_payment", "false")
 
         return render(
             request,
@@ -95,7 +99,6 @@ def food_order(request, item_id, table_id, order_id=None, order_item_id=None):
                 "table": table,
                 "current_order": current_order,
                 "current_order_item": current_order_item,
-                "from_payment": from_payment,
                 "quantity": current_order_item.quantity if current_order_item else 1,
                 "special_requests": (
                     current_order_item.special_requests if current_order_item else ""
@@ -226,10 +229,10 @@ def update_menu_item_status(request, item_id):
 
 @login_required
 def kitchen_display(request):
-    pending_orders = Order.objects.filter(status="Pending")
+    #pending_orders = Order.objects.filter(status="Pending")
+    #pending_orders.update(status="In Progress")
     in_progress_orders = Order.objects.filter(status="In Progress")
 
-    pending_orders.update(status="In Progress")
 
     orders = {
         "in_progress": in_progress_orders,
@@ -288,7 +291,7 @@ def process_payment(request, order_id):
             paid_at=timezone.now()
         )
 
-        order.status = "Pending"
+        order.status = "In Progress"
         order.created_at = timezone.now()
         order.save()
 
@@ -393,17 +396,18 @@ def dashboard(request):
 
         # Filter orders and payments based on the period
         orders = (
-            Order.objects.filter(created_at__gte=start_date)
+            Order.objects.filter(created_at__gte=start_date, status="Completed")
             if start_date
             else Order.objects.all()
         )
         payments = Payment.objects.filter(order__in=orders)
+        print(payments)
 
         # Calculate total orders, total revenue, and average order value
         total_orders = orders.count()
         total_revenue = payments.aggregate(total=Sum("amount"))["total"] or 0
         avg_order_value = round(total_revenue / total_orders, 2) if total_orders else 0
-        preparation_time_data = Order.objects.annotate(
+        preparation_time_data = orders.annotate(
             preparation_time=ExpressionWrapper(
                 F("completed_at") - F("created_at"), output_field=DurationField()
             )
@@ -425,7 +429,8 @@ def dashboard(request):
 
         # Top-selling items
         top_selling_items = (
-            OrderItem.objects.values("menu_item__name", "menu_item__image")
+            OrderItem.objects.filter(order__in=orders)
+            .values("menu_item__name", "menu_item__image")
             .annotate(sold=Sum("quantity"))
             .order_by("-sold")[:5]
         )
@@ -468,20 +473,27 @@ def edit_food_order(request, item_id, table_id, order_id, order_item_id):
                     special_requests = request.POST.get("special_requests", "")
                     total_price = float(request.POST.get("total_price", 0))
                     size = request.POST.get("size", "")  
-                    
-                    current_order_item.quantity = quantity
-                    current_order_item.special_requests = special_requests
-                    current_order_item.size = size
-                    current_order_item.total_price = total_price
-                    current_order_item.save()
-
-                    redirect_url = reverse("payment_page", kwargs={"order_id": current_order.id})
+                    print(quantity)
+                    if quantity == 0:
+                        current_order_item.delete()
+                        if not current_order.orderitem_set.exists():  
+                            current_order.delete()  
+                            redirect_url = reverse("menu_list", kwargs={"table_id": table.id}) 
+                        else:
+                            redirect_url = reverse("process_payment", kwargs={"order_id": current_order.id})
+                    else:
+                        current_order_item.quantity = quantity
+                        current_order_item.special_requests = special_requests
+                        current_order_item.size = size
+                        current_order_item.total_price = total_price
+                        current_order_item.save()
+    
+                        redirect_url = reverse("process_payment", kwargs={"order_id": current_order.id})
                     return JsonResponse({"success": True, "redirect_url": redirect_url})
                 
                 except Exception as e:
                     return JsonResponse({"success": False, "error": str(e)})
 
-        from_payment = request.GET.get("from_payment", "false")
 
         return render(
             request,
@@ -491,7 +503,6 @@ def edit_food_order(request, item_id, table_id, order_id, order_item_id):
                 "table": table,
                 "current_order": current_order,
                 "current_order_item": current_order_item,
-                "from_payment": from_payment,
                 "quantity": current_order_item.quantity if current_order_item else 1,
                 "special_requests": (
                     current_order_item.special_requests if current_order_item else ""

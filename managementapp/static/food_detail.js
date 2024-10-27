@@ -57,7 +57,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     function updateQuantity(change) {
         let currentQuantity = parseInt(quantityValue.textContent);
-        currentQuantity = Math.max(1, currentQuantity + change);
+        currentQuantity = Math.max(0, currentQuantity + change);
         quantityValue.textContent = currentQuantity;
         updateTotalPrice();
     }
@@ -68,7 +68,11 @@ document.addEventListener('DOMContentLoaded', function () {
         const selectedSize = document.querySelector('.size-options input:checked');
         const sizePriceChange = parseInt(selectedSize.parentElement.querySelector('.price-change').textContent.replace('+', ''));
         const totalPrice = (basePrice + sizePriceChange) * quantity;
-        addToCartBtn.textContent = `Add to Cart - ${totalPrice} Baht`;
+        if (quantity === 0) {
+            addToCartBtn.textContent = `Go back to menu`;
+        } else {
+            addToCartBtn.textContent = `Add to Cart - ${totalPrice} Baht`;
+        }
         return totalPrice;
     }
 

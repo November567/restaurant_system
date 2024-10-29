@@ -27,10 +27,8 @@
     </header>
 
     <main class="reporting-main">
-        <!-- CSRF Token -->
         {% csrf_token %}
         
-        <!-- Summary Cards -->
         <section class="summary-cards">
             <div class="summary-card">
                 <h3>Total Orders</h3>
@@ -41,8 +39,8 @@
                 <p id="totalRevenue" class="summary-value">฿0.00</p>
             </div>
             <div class="summary-card">
-                <h3>Avg. Preparation Time</h3> <!-- Changed heading -->
-                <p id="preparationTime" class="summary-value">00:00:00</p> <!-- Changed ID and default value -->
+                <h3>Avg. Preparation Time</h3>
+                <p id="preparationTime" class="summary-value">00:00:00</p>
             </div>
         </section>
 
@@ -56,9 +54,12 @@
                 <h2>Item Performance</h2>
                 <canvas id="itemPerformanceChart"></canvas>
             </div>
+            <div class="chart-box" id="peak-hours">
+                <h2>Peak hours</h2>
+                <canvas id="busiestHoursChart"></canvas> <!-- New chart canvas -->
+            </div>
         </section>
 
-        <!-- Top Selling Items -->
         <section class="top-selling">
             <h2>Top Selling Items</h2>
             <ul id="topSellingList" class="item-list"></ul>
@@ -66,7 +67,91 @@
     </main>
 </div>
 
-<!-- Scripts -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="{% static 'reporting.js' %}"></script>
+
+<script>document.addEventListener("DOMContentLoaded", function () {
+    const dateRangeSelect = document.getElementById("dateRangeSelect");
+    const revenueChartCtx = document.getElementById("revenueChart").getContext("2d");
+    const itemPerformanceChartCtx = document.getElementById("itemPerformanceChart").getContext("2d");
+    const busiestHoursChartCtx = document.getElementById("busiestHoursChart").getContext("2d");
+
+    let revenueChart, itemPerformanceChart, busiestHoursChart;
+
+    const sampleData = [
+        { hour: '08:00', orders: 5 },
+        { hour: '09:00', orders: 15 },
+        { hour: '10:00', orders: 20 },
+        { hour: '11:00', orders: 10 },
+        { hour: '12:00', orders: 25 },
+        { hour: '13:00', orders: 30 },
+        { hour: '14:00', orders: 18 },
+        { hour: '15:00', orders: 22 },
+        { hour: '16:00', orders: 19 },
+        { hour: '17:00', orders: 23 }
+    ];
+
+    // Function to create the peak hours chart
+    function createBusiestHoursChart(data) {
+        const hours = data.map(item => item.hour);
+        const orders = data.map(item => item.orders);
+
+        if (busiestHoursChart) busiestHoursChart.destroy();
+
+        busiestHoursChart = new Chart(busiestHoursChartCtx, {
+            type: 'bar',
+            data: {
+                labels: hours,
+                datasets: [{
+                    label: 'Orders',
+                    data: orders,
+                    backgroundColor: '#FF6384',
+                    borderColor: '#FF6384',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    x: { display: true },
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            stepSize: 5
+                        }
+                    }
+                },
+                plugins: {
+                    legend: { display: true }
+                }
+            }
+        });
+    }
+
+    // Initialize with sample data
+    createBusiestHoursChart(sampleData);
+
+    // Fetch and update other data
+    function fetchDashboardData(period = "today") {
+        fetch(`/dashboard?period=${period}`, {
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        })
+        .then(response => response.json())
+        .then(data => {
+            updateSummaryCards(data.dashboardData);
+            updateRevenueChart(data.dashboardData.revenueData);
+            updateTopSellingItems(data.topSellingItems);
+            // Optionally, replace sampleData with data from the server if available
+        })
+        .catch(error => console.error("Error fetching dashboard data:", error));
+    }
+
+    dateRangeSelect.addEventListener("change", function() {
+        fetchDashboardData(this.value);
+    });
+
+    fetchDashboardData();
+});
+
+</script>
+
 {% endblock %}

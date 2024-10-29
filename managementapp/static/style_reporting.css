@@ -142,6 +142,10 @@ body {
     color: #666;
 }
 
+#peak-hours {
+    height: 350px;
+}
+
 @media (max-width: 768px) {
     .summary-cards,
     .charts-container,

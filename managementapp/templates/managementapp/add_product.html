@@ -129,14 +129,28 @@
                 <div class="form-actions">
                     <button type="submit" class="submit-btn">Add Product</button>
                     <button type="button" class="cancel-btn" onclick="history.back()">Cancel</button>
-
                 </div>
             </form>
         </div>
         <script>
             document.addEventListener('DOMContentLoaded', function () {
                 const statusToggle = document.getElementById('status-toggle');
-                
+                const addProductForm = document.getElementById('add-product-form');
+
+                addProductForm.addEventListener('submit', function (event) {
+                    // Check the status of the toggle before submitting
+                    const isAvailable = statusToggle.checked;
+
+                    // If the toggle is not checked, add a hidden input to send 'unavailable'
+                    if (!isAvailable) {
+                        const unavailableInput = document.createElement('input');
+                        unavailableInput.type = 'hidden';
+                        unavailableInput.name = 'available';
+                        unavailableInput.value = 'unavailable'; // You can use a specific value as per your backend logic
+                        addProductForm.appendChild(unavailableInput);
+                    }
+                });
+
                 function getCookie(name) {
                     let cookieValue = null;
                     if (document.cookie && document.cookie !== '') {

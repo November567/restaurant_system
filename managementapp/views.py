@@ -149,7 +149,12 @@ def add_product(request):
         form = MenuItemForm(request.POST, request.FILES)
         if form.is_valid():
             if form.cleaned_data["image"]:
-                form.save()
+                product = form.save(commit=False)
+                
+                # ตั้งค่าฟิลด์ available ให้เป็น Boolean
+                product.available = request.POST.get("available") == "on"  # ถ้าติ๊กเลือกจะเป็น True, ถ้าไม่ติ๊กจะเป็น False
+                product.save()
+                
                 return redirect("menu_management")
             else:
                 form.add_error("image", "Please upload an image.")

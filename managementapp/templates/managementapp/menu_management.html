@@ -48,6 +48,7 @@
                             <th>Price</th>
                             <th>Description</th>
                             <th>Category</th>
+                            <th>Status</th> <!-- New Status column -->
                             <th>Actions</th>
                         </tr>
                     </thead>
@@ -64,6 +65,13 @@
                                 <td>{{ item.price }} THB</td>
                                 <td>{{ item.description }}</td>
                                 <td>{{ item.category }}</td>
+                                <td>
+                                    {% if item.available %}
+                                        <span class="status-available">Available</span>
+                                    {% else %}
+                                        <span class="status-unavailable">Unavailable</span>
+                                    {% endif %}
+                                </td> <!-- Display availability status here -->
                                 <td class="action-buttons">
                                     <button class="edit-btn" data-id="{{ item.id }}">
                                         <i class="fas fa-edit"></i>
@@ -76,13 +84,12 @@
                             {% endfor %}
                         {% else %}
                             <tr>
-                                <td colspan="6" class="no-items-message">No menu items available.</td>
+                                <td colspan="7" class="no-items-message">No menu items available.</td>
                             </tr>
                         {% endif %}
                     </tbody>
                 </table>
             </div>
-        </div>
 
         <style>
             /* Global reset and base styles */
@@ -155,6 +162,26 @@
                 .filter-section, .add-product-btn, .action-buttons { display: none; }
                 .menu-table th, .menu-table td { border: 1px solid #ddd; }
             }
+            .status-available {
+                color: green;
+                font-weight: bold;
+                padding: 5px 10px;
+                border: 2px solid green;
+                border-radius: 8px;
+                background-color: #e6f4ea; /* Light green background */
+                display: inline-block;
+            }
+
+            .status-unavailable {
+                color: red;
+                font-weight: bold;
+                padding: 5px 10px;
+                border: 2px solid red;
+                border-radius: 8px;
+                background-color: #f8e6e6; /* Light red background */
+                display: inline-block;
+            }
+
         </style>
 
         <script>

@@ -1,20 +1,14 @@
 {% extends "managementapp/kitchen.html" %}
 {% load static %}
+
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    {% block title %}
-    <title>Menu Management</title>
-    {% endblock %}
-    {% block css %}
-    <link rel="stylesheet" href="{% static 'style_menu_management.css' %}" type="text/css">
+    {% block title %}<title>Menu Management</title>{% endblock %}
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    {% endblock %}
 </head>
-
 <body>
     <div class="content">
         {% block content %}
@@ -41,26 +35,218 @@
                 </select>
             </div>
 
-            <!-- Added the 'menu-list' div for dynamic content rendering -->
-            <div id="menu-list" class="menu-items-list">
-                {{ form.as_p }}
-                {% if menu_items %}
-                <ul>
-                    {% for item in menu_items %}
-                    <li>
-                        <strong>{{ item.name }}</strong> - ${{ item.price }} <br>
-                        <small>{{ item.description }}</small>
-                    </li>
-                    {% endfor %}
-                </ul>
-                {% else %}
-                <p>No menu items available.</p>
-                {% endif %}
+            <div class="loading-indicator" style="display: none;">
+                <i class="fas fa-spinner fa-spin"></i> Loading...
+            </div>
+
+            <div class="table-responsive">
+                <table id="menu-list" class="menu-table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Image</th>
+                            <th>Price</th>
+                            <th>Description</th>
+                            <th>Category</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="menu-items-body">
+                        {% if menu_items %}
+                            {% for item in menu_items %}
+                            <tr class="menu-item" data-category="{{ item.category }}" data-id="{{ item.id }}">
+                                <td>{{ item.name }}</td>
+                                <td>
+                                    {% if item.image %}
+                                    <img src="{{ item.image.url }}" alt="{{ item.name }}" class="menu-item-image">
+                                    {% endif %}
+                                </td>
+                                <td>{{ item.price }} THB</td>
+                                <td>{{ item.description }}</td>
+                                <td>{{ item.category }}</td>
+                                <td class="action-buttons">
+                                    <button class="edit-btn" data-id="{{ item.id }}">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="delete-btn" data-id="{{ item.id }}" onclick="deleteItem({{ item.id }})">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="6" class="no-items-message">No menu items available.</td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
             </div>
         </div>
-        <script src="{% static 'menu_management.js' %}"></script>
+
+        <style>
+            /* Global reset and base styles */
+            * { margin: 0; padding: 0; box-sizing: border-box; }
+            body { font-family: 'Poppins', sans-serif; background-color: #f9f9f9; color: #333; line-height: 1.6; }
+
+            /* Layout containers */
+            .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+            .menu-management { padding: 30px; }
+
+            /* Header styles */
+            .management-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+            .management-header h1 { color: #ff6347; font-size: 32px; }
+
+            /* Add product button */
+            .add-product-btn {
+                background-color: #4CAF50; color: white; border: none; padding: 12px 20px; border-radius: 5px;
+                cursor: pointer; font-weight: bold; display: inline-flex; align-items: center; font-size: 16px;
+                transition: background-color 0.3s ease;
+            }
+            .add-product-btn:hover { background-color: #45a049; }
+            .add-product-btn i { margin-right: 8px; }
+
+            /* Filter section */
+            .filter-section { display: flex; justify-content: space-between; gap: 20px; margin-bottom: 30px; }
+            .search-bar { display: flex; align-items: center; border: 1px solid #ccc; border-radius: 5px; flex-grow: 1; background-color: white; }
+            .search-bar input { border: none; padding: 12px; font-size: 16px; width: 100%; }
+            .search-icon { border: none; padding: 12px; cursor: pointer; color: #666; }
+            .category-select { padding: 12px; border: 1px solid #ccc; border-radius: 5px; font-size: 16px; width: 200px; background-color: white; }
+
+            /* Loading indicator */
+            .loading-indicator { text-align: center; padding: 20px; font-size: 18px; color: #666; }
+            .loading-indicator i { margin-right: 10px; }
+
+            /* Menu table styling */
+            .menu-table {
+                width: 100%; border-collapse: collapse; margin-top: 20px;
+                background-color: #ffffff; border-radius: 10px; overflow: hidden;
+                box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            }
+            .menu-table th, .menu-table td { padding: 15px; text-align: left; border-bottom: 1px solid #eeeeee; }
+            .menu-table th { background-color: #ff6347; color: #ffffff; font-weight: bold; font-size: 16px; text-transform: uppercase; }
+            .menu-table tbody tr:hover { background-color: #ffefef; transition: background-color 0.3s ease; }
+
+            /* Menu item image */
+            .menu-item-image { width: 50px; height: 50px; object-fit: cover; border-radius: 5px; border: 1px solid #ddd; padding: 2px; }
+
+            /* Action buttons */
+            .action-buttons { display: flex; gap: 8px; }
+            .edit-btn, .delete-btn { background: none; border: none; cursor: pointer; padding: 5px; transition: transform 0.2s ease; font-size: 1.2em; }
+            .edit-btn { color: #2196F3; }
+            .delete-btn { color: #dc3545; }
+            .edit-btn:hover { color: #0d6efd; transform: scale(1.1); }
+            .delete-btn:hover { color: #bb2d3b; transform: scale(1.1); }
+
+            /* Empty state */
+            .no-items-message { text-align: center; padding: 40px; color: #666; font-size: 16px; font-style: italic; background-color: #f8f8f8; }
+
+            /* Responsive design */
+            @media (max-width: 768px) {
+                .container { padding: 10px; }
+                .menu-management { padding: 15px; }
+                .management-header { flex-direction: column; gap: 15px; }
+                .filter-section { flex-direction: column; gap: 15px; }
+                .category-select { width: 100%; }
+            }
+
+            /* Print styles */
+            @media print {
+                .filter-section, .add-product-btn, .action-buttons { display: none; }
+                .menu-table th, .menu-table td { border: 1px solid #ddd; }
+            }
+        </style>
+
+        <script>
+            function getCookie(name) {
+                let cookieValue = null;
+                if (document.cookie && document.cookie !== '') {
+                    const cookies = document.cookie.split(';');
+                    for (let i = 0; i < cookies.length; i++) {
+                        const cookie = cookies[i].trim();
+                        // Check if this cookie string begins with the name we want
+                        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                            break;
+                        }
+                    }
+                }
+                return cookieValue;
+            }
+
+            function deleteItem(itemId) {
+                if (confirm('Are you sure you want to delete this item?')) {
+                    fetch(`/api/menu_items/${itemId}/delete/`, {
+                        method: 'DELETE',
+                        headers: {
+                            'X-CSRFToken': getCookie('csrftoken'),
+                        },
+                    })
+                    .then(response => {
+                        if (response.ok) {
+                            console.log(`Item ${itemId} deleted successfully.`);
+                            const itemRow = document.querySelector(`.menu-item[data-id="${itemId}"]`);
+                            if (itemRow) {
+                                itemRow.remove();
+                            }
+                        } else {
+                            console.error(`Failed to delete item ${itemId}`);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error deleting item:', error);
+                    });
+                }
+            }
+
+            // Function to filter items
+            function filterItems() {
+                const searchInput = document.getElementById('search-input').value.toLowerCase();
+                const categorySelect = document.getElementById('category-select').value;
+                const items = document.querySelectorAll('.menu-item');
+
+                items.forEach(item => {
+                    const itemName = item.cells[0].textContent.toLowerCase();
+                    const itemCategory = item.getAttribute('data-category');
+
+                    const matchesSearch = itemName.includes(searchInput);
+                    const matchesCategory = categorySelect === '' || itemCategory === categorySelect;
+
+                    if (matchesSearch && matchesCategory) {
+                        item.style.display = '';
+                    } else {
+                        item.style.display = 'none';
+                    }
+                });
+            }
+
+            // Event listeners for search and category filter
+            document.getElementById('search-input').addEventListener('input', filterItems);
+            document.getElementById('category-select').addEventListener('change', filterItems);
+
+            // Event listeners for add product and edit buttons
+            document.addEventListener('DOMContentLoaded', function() {
+                const addProductBtn = document.querySelector('.add-product-btn');
+                if (addProductBtn) {
+                    addProductBtn.addEventListener('click', function (e) {
+                        e.preventDefault();
+                        window.location.href = '/add_product'; // Change this to your actual route
+                    });
+                }
+
+                // Adding click event listeners to all edit buttons
+                const editButtons = document.querySelectorAll('.edit-btn');
+                editButtons.forEach(btn => {
+                    btn.addEventListener('click', function (e) {
+                        const itemId = btn.getAttribute('data-id');
+                        // Navigate to the edit page for the specific item
+                        window.location.href = `/edit_product/${itemId}/`; // Change this to your actual route
+                    });
+                });
+            });
+        </script>
+
         {% endblock %}
     </div>
 </body>
-
 </html>

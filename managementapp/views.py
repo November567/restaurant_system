@@ -518,3 +518,5 @@ def edit_food_order(request, item_id, table_id, order_id, order_item_id):
 
         # Return a JSON response with error details
         return JsonResponse({"success": False, "error": str(e)}, status=500)
+    
+

@@ -10,8 +10,8 @@ from django.views.decorators.csrf import csrf_exempt
 from .models import Table, MenuItem, Order, OrderItem
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.forms import AuthenticationForm
-from django.db.models import Sum, F, FloatField, ExpressionWrapper, DurationField, Avg
-from django.templatetags.static import static
+from django.db.models import Sum, F, FloatField, ExpressionWrapper, DurationField, Avg, Count
+from django.db.models.functions import TruncHour
 from django.contrib import messages
 from django.contrib.auth.models import User
 from .forms import MenuItemForm
@@ -443,12 +443,25 @@ def dashboard(request):
             .order_by("-sold")[:5]
         )
 
+        # Calculate peak hours
+        peak_hours_data = (
+            Order.objects.annotate(hour=TruncHour("created_at"))
+            .values("hour")
+            .annotate(order_count=Count("id"))
+            .order_by("-order_count")
+        )
+        peak_hours = peak_hours_data[:5]
+
         # Prepare data for the frontend
         dashboard_data = {
             "totalOrders": total_orders,
             "totalRevenue": total_revenue,
             "preparation_time_data": avg_preparation_time,
             "revenueData": list(revenue_data),
+            "peakHours": [
+                {"hour": peak["hour"].strftime('%H:%M') if peak["hour"] else "N/A", "order_count": peak["order_count"]}
+                for peak in peak_hours
+            ],
         }
 
         top_selling = [

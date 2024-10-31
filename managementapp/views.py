@@ -444,13 +444,17 @@ def dashboard(request):
         )
 
         # Calculate peak hours
-        peak_hours_data = (
-            Order.objects.annotate(hour=TruncHour("created_at"))
-            .values("hour")
-            .annotate(order_count=Count("id"))
-            .order_by("-order_count")
-        )
-        peak_hours = peak_hours_data[:5]
+        if Order.objects.filter(completed_at__isnull=False).exists():
+            peak_hours_data = (
+                Order.objects.filter(completed_at__isnull=False)
+                .annotate(hour=TruncHour("completed_at"))
+                .values("hour")
+                .annotate(order_count=Count("id"))
+                .order_by("-order_count")
+            )
+            peak_hours = peak_hours_data[:5]
+        else:
+            peak_hours = []
 
         # Prepare data for the frontend
         dashboard_data = {

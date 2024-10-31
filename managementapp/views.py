@@ -50,7 +50,6 @@ def food_order(request, item_id, table_id, order_id=None, order_item_id=None):
         table = get_object_or_404(Table, pk=table_id)
         current_order = None
         current_order_item = None
-
         if order_id:
             current_order = get_object_or_404(Order, pk=order_id)
 
@@ -70,9 +69,13 @@ def food_order(request, item_id, table_id, order_id=None, order_item_id=None):
                 if quantity == 0:
                     if not order.orderitem_set.exists():  
                         order.delete()  
-                        redirect_url = reverse("menu_list", kwargs={"table_id": table.id})  
+                        redirect_url = reverse(
+                                "menu_list", kwargs={"table_id": table.id}
+                            )
                     else:
-                        redirect_url = reverse("menu_list", kwargs={"table_id": table.id, "order_id": order.id})
+                        redirect_url = reverse(
+                                "menu_list", kwargs={"table_id": table.id, "order_id": order.id}
+                            )
                 else:
                     OrderItem.objects.create(
                             order=order,
@@ -85,8 +88,8 @@ def food_order(request, item_id, table_id, order_id=None, order_item_id=None):
 
 
                     redirect_url = reverse(
-                            "menu_list", kwargs={"table_id": table.id, "order_id": order.id}
-                        )
+                                "menu_list", kwargs={"table_id": table.id, "order_id": order.id}
+                            )
 
                 return JsonResponse({"success": True, "redirect_url": redirect_url})
 

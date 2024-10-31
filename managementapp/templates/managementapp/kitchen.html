@@ -145,6 +145,16 @@
                 </div>
             </main>
         </div>
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                console.log("JavaScript loaded and running");
+    
+                setInterval(() => {
+                    console.log("Refreshing...");
+                    window.location.reload();
+                }, 5000);
+            });
+        </script>
         <script src="{% static 'kitchen.js' %}"></script>
         {% endblock %}
     </div>

@@ -450,13 +450,17 @@ def dashboard(request):
         )
 
         # Calculate peak hours
-        peak_hours_data = (
-            Order.objects.filter(completed_at__isnull=False)
-            .annotate(hour=TruncHour("completed_at"))
-            .values("hour")
-            .annotate(order_count=Count("id"))
-            .order_by("-order_count")
-        )[:5] if Order.objects.filter(completed_at__isnull=False).exists() else []
+        if Order.objects.filter(completed_at__isnull=False).exists():
+            peak_hours_data = (
+                Order.objects.filter(completed_at__isnull=False)
+                .annotate(hour=TruncHour("completed_at"))
+                .values("hour")
+                .annotate(order_count=Count("id"))
+                .order_by("-order_count")
+            )
+            peak_hours = peak_hours_data[:5]
+        else:
+            peak_hours = []
 
         # Prepare data for the frontend
         dashboard_data = {
@@ -466,7 +470,7 @@ def dashboard(request):
             "revenueData": list(revenue_data),
             "peakHours": [
                 {"hour": peak["hour"].strftime('%H:%M') if peak["hour"] else "N/A", "order_count": peak["order_count"]}
-                for peak in peak_hours_data
+                for peak in peak_hours
             ],
         }
 

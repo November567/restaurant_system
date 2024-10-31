@@ -1,102 +1,110 @@
-document.addEventListener('DOMContentLoaded', () => {
-    const csrfToken = getCookie('csrftoken');
-    const inProgressSection = document.querySelector('.in-progress-section');
-    const completedSection = document.querySelector('.completed-section');
+document.addEventListener('DOMContentLoaded', function () {
 
-    function getCookie(name) {
-        let cookieValue = null;
-        if (document.cookie && document.cookie !== '') {
-            const cookies = document.cookie.split(';');
-            for (let i = 0; i < cookies.length; i++) {
-                const cookie = cookies[i].trim();
-                if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                    break;
-                }
+    const basketBtn = document.querySelector('.basket-button');
+    if (basketBtn) {
+        basketBtn.addEventListener('click', function () {
+            const orderId = this.getAttribute('data-order-id');
+            console.log('Order ID:', orderId);
+            if (orderId) {
+                navigateToBasket(orderId);
+            } else {
+                console.error('No order ID found');
             }
-        }
-        return cookieValue;
+        });
     }
 
-    // Handle clicking on the "Complete" button
-    document.addEventListener('click', async (event) => {
-        if (event.target.classList.contains('complete-order')) {
-            const orderCard = event.target.closest('.order-card');
-            const orderId = orderCard.dataset.id;
-            const currentStatus = orderCard.dataset.status;
+    function navigateToBasket(orderId) {
+        window.location.href = `/payment/order/${orderId}/`;
+    }
 
-            if (currentStatus !== 'completed') {
-                try {
-                    const response = await fetch(`/api/orders/${orderId}/complete/`, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRFToken': csrfToken
-                        }
-                    });
+    // Smooth scrolling for navigation links
+    document.querySelectorAll('nav a').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            e.preventDefault();
+            const targetId = this.getAttribute('href');
+            const targetElement = document.querySelector(targetId);
+            const headerOffset = 170;
+            const elementPosition = targetElement.getBoundingClientRect().top;
+            const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
 
-                    if (response.ok) {
-                        // Update the order card
-                        orderCard.classList.remove(currentStatus);
-                        orderCard.classList.add('completed');
-                        orderCard.dataset.status = 'completed';
-
-                        // Remove the complete button
-                        event.target.remove();
-
-                        // Move the order card to the completed section
-                        completedSection.appendChild(orderCard);
-
-                        // Optionally, you can add some visual feedback
-                        orderCard.style.animation = 'fadeOut 0.5s';
-                        setTimeout(() => {
-                            orderCard.style.animation = '';
-                        }, 500);
-                    } else {
-                        console.error('Failed to update order status');
-                    }
-                } catch (error) {
-                    console.error('Error:', error);
-                }
-            }
-        }
+            window.scrollTo({
+                top: offsetPosition,
+                behavior: 'smooth'
+            });
+        });
     });
 
-    // Handle clicking on the "View Details" button
-    document.addEventListener('click', (event) => {
-        if (event.target.closest('.view-details')) {
-            const button = event.target.closest('.view-details');
-            const orderId = button.dataset.id;
-            // Redirect to the order detail page
-            window.location.href = `/get-order-details/${orderId}/`; // Django URL for the order detail
-        }
-    });
+    // Search functionality
+    const searchBar = document.querySelector('.search-bar input');
+    const menuItemsList = document.querySelectorAll('.menu-item');
 
-    // Navigation functionality
-    const navButtons = document.querySelectorAll('.kds-nav .nav-btn');
-    navButtons.forEach(button => {
-        button.addEventListener('click', () => {
-            navButtons.forEach(btn => btn.classList.remove('active'));
-            button.classList.add('active');
-            
-            const status = button.classList.contains('completed') ? 'completed' : 'in-progress';
-
-            // Redirect to the appropriate path when the button is clicked
-            if (status === 'completed') {
-                window.location.href = '/kitchen/completed';
-            } else if (status === 'in-progress') {
-                window.location.href = '/kitchen/in_progress';
+    searchBar.addEventListener('input', function () {
+        const searchTerm = this.value.toLowerCase();
+        menuItemsList.forEach(item => {
+            const itemName = item.querySelector('.menu-item-name').textContent.toLowerCase();
+            const itemDescription = item.querySelector('.menu-item-description').textContent.toLowerCase();
+            if (itemName.includes(searchTerm) || itemDescription.includes(searchTerm)) {
+                item.style.display = '';
+            } else {
+                item.style.display = 'none';
             }
         });
     });
 
-    // Initial setup: Move orders to their respective sections
-    document.querySelectorAll('.order-card').forEach(card => {
-        const status = card.dataset.status;
-        if (status === 'in-progress') {
-            inProgressSection.appendChild(card);
-        } else if (status === 'completed') {
-            completedSection.appendChild(card);
-        }
+
+
+    // Lazy load images after menu items are added
+    if ('IntersectionObserver' in window) {
+        const imageObserver = new IntersectionObserver((entries, observer) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const image = entry.target;
+                    image.src = image.dataset.src;
+                    image.classList.remove('lazy');
+                    observer.unobserve(image);
+                }
+            });
+        });
+
+        document.querySelectorAll('img.lazy').forEach(img => {
+            imageObserver.observe(img);
+        });
+    } else {
+        // Fallback for browsers that don't support IntersectionObserver
+        document.querySelectorAll('img.lazy').forEach(img => {
+            img.src = img.dataset.src;
+            img.classList.remove('lazy');
+        });
+    }
+
+    const addButtons = document.querySelectorAll('.add-button');
+    addButtons.forEach(button => {
+        button.addEventListener('click', function (event) {
+            const menuItem = event.target.closest('.menu-item'); 
+            const itemId = menuItem.dataset.itemId;  
+            const tableId = menuItem.dataset.tableId;  
+
+            const currentPath = window.location.pathname;
+            let orderId = null;
+
+            const match = currentPath.match(/\/order\/(\d+)\//);
+            if (match) {
+                orderId = match[1];  
+            }
+
+            let url;
+            if (orderId) {
+                url = `/table/${tableId}/menu_item/${itemId}/order/${orderId}/`;
+            } else {
+                url = `/table/${tableId}/menu_item/${itemId}/`;
+            }
+
+            window.location.href = url;
+        });
     });
+
+
+
 });
+
+

@@ -18,7 +18,10 @@ document.addEventListener('DOMContentLoaded', () => {
         return cookieValue;
     }
 
-    // Handle clicking on the "Complete" button
+    // Auto-refresh page every 5 seconds
+    
+
+    // The rest of your code for handling buttons, navigation, etc.
     document.addEventListener('click', async (event) => {
         if (event.target.classList.contains('complete-order')) {
             const orderCard = event.target.closest('.order-card');
@@ -36,22 +39,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     });
 
                     if (response.ok) {
-                        // Update the order card
                         orderCard.classList.remove(currentStatus);
                         orderCard.classList.add('completed');
                         orderCard.dataset.status = 'completed';
-
-                        // Remove the complete button
                         event.target.remove();
-
-                        // Move the order card to the completed section
                         completedSection.appendChild(orderCard);
-
-                        // Optionally, you can add some visual feedback
-                        orderCard.style.animation = 'fadeOut 0.5s';
-                        setTimeout(() => {
-                            orderCard.style.animation = '';
-                        }, 500);
                     } else {
                         console.error('Failed to update order status');
                     }
@@ -62,26 +54,21 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Handle clicking on the "View Details" button
     document.addEventListener('click', (event) => {
         if (event.target.closest('.view-details')) {
             const button = event.target.closest('.view-details');
             const orderId = button.dataset.id;
-            // Redirect to the order detail page
-            window.location.href = `/get-order-details/${orderId}/`; // Django URL for the order detail
+            window.location.href = `/get-order-details/${orderId}/`;
         }
     });
 
-    // Navigation functionality
     const navButtons = document.querySelectorAll('.kds-nav .nav-btn');
     navButtons.forEach(button => {
         button.addEventListener('click', () => {
             navButtons.forEach(btn => btn.classList.remove('active'));
             button.classList.add('active');
-            
-            const status = button.classList.contains('completed') ? 'completed' : 'in-progress';
 
-            // Redirect to the appropriate path when the button is clicked
+            const status = button.classList.contains('completed') ? 'completed' : 'in-progress';
             if (status === 'completed') {
                 window.location.href = '/kitchen/completed';
             } else if (status === 'in-progress') {
@@ -89,14 +76,9 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     });
-
-    // Initial setup: Move orders to their respective sections
-    document.querySelectorAll('.order-card').forEach(card => {
-        const status = card.dataset.status;
-        if (status === 'in-progress') {
-            inProgressSection.appendChild(card);
-        } else if (status === 'completed') {
-            completedSection.appendChild(card);
-        }
-    });
 });
+
+setInterval(() => {
+    console.log("Refreshing...");
+    window.location.reload();
+}, 5000);

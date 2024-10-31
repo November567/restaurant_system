@@ -16,6 +16,8 @@ from django.contrib import messages
 from django.contrib.auth.models import User
 from .forms import MenuItemForm
 import json
+from django.db.models.functions import TruncHour
+from django.db.models import Count
 
 
 def menu_list(request, table_id, order_id=None):
@@ -379,12 +381,13 @@ def format_duration(duration):
     return f'{int(hours):02}:{int(minutes):02}:{int(seconds):02}'
 
 
+
 def dashboard(request):
     if request.headers.get('x-requested-with') == 'XMLHttpRequest':
-        # Get the period filter from the query string (e.g., 'today', 'week', 'month')
+        # Existing period filter logic
         period = request.GET.get("period", "today")
 
-        # Filter orders based on the selected period
+        # Filtering by time periods
         if period == "today":
             start_date = timezone.now().replace(hour=0, minute=0, second=0)
         elif period == "week":
@@ -394,18 +397,22 @@ def dashboard(request):
         else:
             start_date = None
 
-        # Filter orders and payments based on the period
-        orders = (
-            Order.objects.filter(created_at__gte=start_date, status="Completed")
-            if start_date
-            else Order.objects.all()
-        )
-        payments = Payment.objects.filter(order__in=orders)
-        print(payments)
+        orders = Order.objects.filter(created_at__gte=start_date, status="Completed") if start_date else Order.objects.all()
 
-        # Calculate total orders, total revenue, and average order value
+        # Aggregate orders by hour to determine peak hours
+        peak_hours_data = (
+            orders.annotate(hour=TruncHour('created_at'))
+            .values('hour')
+            .annotate(order_count=Count('id'))
+            .order_by('-order_count')
+        )
+
+        # Preparing the peak hours for easy access on frontend (Top 3 hours)
+        peak_hours = list(peak_hours_data[:3])
+
+        # Calculate other dashboard data (existing logic)
         total_orders = orders.count()
-        total_revenue = payments.aggregate(total=Sum("amount"))["total"] or 0
+        total_revenue = Payment.objects.filter(order__in=orders).aggregate(total=Sum("amount"))["total"] or 0
         avg_order_value = round(total_revenue / total_orders, 2) if total_orders else 0
         preparation_time_data = orders.annotate(
             preparation_time=ExpressionWrapper(
@@ -413,12 +420,17 @@ def dashboard(request):
             )
         ).aggregate(avg_preparation_time=Avg("preparation_time"))
 
-        avg_preparation_time = preparation_time_data['avg_preparation_time']
-        if avg_preparation_time:
-            avg_preparation_time = format_duration(avg_preparation_time)  # Convert to hh:mm:ss
-        else:
-            avg_preparation_time = 'N/A'
+        avg_preparation_time = format_duration(preparation_time_data['avg_preparation_time']) if preparation_time_data['avg_preparation_time'] else 'N/A'
 
+        # Send the prepared data to the frontend
+        return JsonResponse({
+            "dashboardData": {
+                "totalOrders": total_orders,
+                "totalRevenue": total_revenue,
+                "avgPreparationTime": avg_preparation_time,
+                "peakHours": peak_hours,  # New peak hours data
+            }
+        })
         # Revenue data over time
         revenue_data = (
             Payment.objects.annotate(date=F("paid_at__date"))

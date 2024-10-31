@@ -10,12 +10,13 @@ from django.views.decorators.csrf import csrf_exempt
 from .models import Table, MenuItem, Order, OrderItem
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.forms import AuthenticationForm
-from django.db.models import Sum, F, FloatField, ExpressionWrapper, DurationField, Avg
+from django.db.models import Sum, Count,F, FloatField, ExpressionWrapper, DurationField, Avg
 from django.templatetags.static import static
 from django.contrib import messages
 from django.contrib.auth.models import User
 from .forms import MenuItemForm
 import json
+from django.db.models.functions import TruncHour
 
 
 def menu_list(request, table_id, order_id=None):
@@ -149,12 +150,7 @@ def add_product(request):
         form = MenuItemForm(request.POST, request.FILES)
         if form.is_valid():
             if form.cleaned_data["image"]:
-                product = form.save(commit=False)
-                
-                # ตั้งค่าฟิลด์ available ให้เป็น Boolean
-                product.available = request.POST.get("available") == "on"  # ถ้าติ๊กเลือกจะเป็น True, ถ้าไม่ติ๊กจะเป็น False
-                product.save()
-                
+                form.save()
                 return redirect("menu_management")
             else:
                 form.add_error("image", "Please upload an image.")
@@ -389,40 +385,30 @@ def dashboard(request):
         # Get the period filter from the query string (e.g., 'today', 'week', 'month')
         period = request.GET.get("period", "today")
 
-        # Filter orders based on the selected period
+        # Determine the start date based on the selected period
         if period == "today":
             start_date = timezone.now().replace(hour=0, minute=0, second=0)
         elif period == "week":
             start_date = timezone.now() - timezone.timedelta(days=7)
-        elif period == "month":
+        elif period == "month": 
             start_date = timezone.now().replace(day=1)
         else:
             start_date = None
 
-        # Filter orders and payments based on the period
-        orders = (
-            Order.objects.filter(created_at__gte=start_date, status="Completed")
-            if start_date
-            else Order.objects.all()
-        )
+        # Filter orders based on the selected period
+        orders = Order.objects.filter(created_at__gte=start_date, status="Completed") if start_date else Order.objects.all()
         payments = Payment.objects.filter(order__in=orders)
-        print(payments)
 
         # Calculate total orders, total revenue, and average order value
         total_orders = orders.count()
         total_revenue = payments.aggregate(total=Sum("amount"))["total"] or 0
         avg_order_value = round(total_revenue / total_orders, 2) if total_orders else 0
         preparation_time_data = orders.annotate(
-            preparation_time=ExpressionWrapper(
-                F("completed_at") - F("created_at"), output_field=DurationField()
-            )
+            preparation_time=ExpressionWrapper(F("completed_at") - F("created_at"), output_field=DurationField())
         ).aggregate(avg_preparation_time=Avg("preparation_time"))
 
         avg_preparation_time = preparation_time_data['avg_preparation_time']
-        if avg_preparation_time:
-            avg_preparation_time = format_duration(avg_preparation_time)  # Convert to hh:mm:ss
-        else:
-            avg_preparation_time = 'N/A'
+        avg_preparation_time = format_duration(avg_preparation_time) if avg_preparation_time else 'N/A'
 
         # Revenue data over time
         revenue_data = (
@@ -440,12 +426,25 @@ def dashboard(request):
             .order_by("-sold")[:5]
         )
 
+        # Calculate peak hours
+        peak_hours_data = (
+            Order.objects.annotate(hour=TruncHour("created_at"))
+            .values("hour")
+            .annotate(order_count=Count("id"))
+            .order_by("-order_count")
+        )
+        peak_hours = peak_hours_data[:5]  # Top 5 hours with most orders
+
         # Prepare data for the frontend
         dashboard_data = {
             "totalOrders": total_orders,
             "totalRevenue": total_revenue,
-            "preparation_time_data": avg_preparation_time,
+            "avgPreparationTime": avg_preparation_time,
             "revenueData": list(revenue_data),
+            "peakHours": [
+                {"hour": peak["hour"].strftime('%H:%M'), "order_count": peak["order_count"]}
+                for peak in peak_hours
+            ],
         }
 
         top_selling = [
@@ -458,9 +457,8 @@ def dashboard(request):
         ]
 
         # Return JSON response
-        return JsonResponse(
-            {"dashboardData": dashboard_data, "topSellingItems": top_selling}
-        )
+        return JsonResponse({"dashboardData": dashboard_data, "topSellingItems": top_selling})
+
     return render(request, 'managementapp/dashboard.html')
 
 @require_http_methods(["GET", "POST"])
@@ -523,5 +521,3 @@ def edit_food_order(request, item_id, table_id, order_id, order_item_id):
 
         # Return a JSON response with error details
         return JsonResponse({"success": False, "error": str(e)}, status=500)
-    
-

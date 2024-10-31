@@ -42,7 +42,6 @@
                 <h3>Avg. Preparation Time</h3>
                 <p id="preparationTime" class="summary-value">00:00:00</p>
             </div>
-            
         </section>
         
         <!-- Charts -->
@@ -56,7 +55,7 @@
                 <canvas id="itemPerformanceChart"></canvas>
             </div>
             <div class="chart-box" id="peak-hours">
-                <h2>Peak hours</h2>
+                <h2>Peak Hours</h2>
                 <canvas id="busiestHoursChart"></canvas>
             </div>
         </section>
@@ -79,29 +78,13 @@
 <script>
 document.addEventListener("DOMContentLoaded", function () {
     const dateRangeSelect = document.getElementById("dateRangeSelect");
-    const revenueChartCtx = document.getElementById("revenueChart").getContext("2d");
-    const itemPerformanceChartCtx = document.getElementById("itemPerformanceChart").getContext("2d");
     const busiestHoursChartCtx = document.getElementById("busiestHoursChart").getContext("2d");
-
-    let revenueChart, itemPerformanceChart, busiestHoursChart;
-
-    const sampleData = [
-        { hour: '08:00', orders: 5 },
-        { hour: '09:00', orders: 15 },
-        { hour: '10:00', orders: 20 },
-        { hour: '11:00', orders: 10 },
-        { hour: '12:00', orders: 25 },
-        { hour: '13:00', orders: 30 },
-        { hour: '14:00', orders: 18 },
-        { hour: '15:00', orders: 22 },
-        { hour: '16:00', orders: 19 },
-        { hour: '17:00', orders: 23 }
-    ];
+    let busiestHoursChart;
 
     // Function to create the peak hours chart
     function createBusiestHoursChart(data) {
         const hours = data.map(item => item.hour);
-        const orders = data.map(item => item.orders);
+        const orders = data.map(item => item.order_count);
 
         if (busiestHoursChart) busiestHoursChart.destroy();
 
@@ -132,35 +115,34 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
-    // Initialize with sample data
-    createBusiestHoursChart(sampleData);
-
-    // Function to update least selling item
-    function updateLeastSellingItem(item) {
-        const leastSellingItemElement = document.getElementById("leastSellingItem");
-        leastSellingItemElement.textContent = `${item.name} (${item.quantity} sold)`;
-    }
-
-    // Fetch and update other data
-    function fetchDashboardData(period = "today") {
-        fetch(`/dashboard?period=${period}`, {
-            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+    // Fetch and update peak hours data from the server
+    function fetchPeakHoursData() {
+        fetch('/dashboard/?period=' + dateRangeSelect.value, {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'Content-Type': 'application/json'
+            }
         })
         .then(response => response.json())
         .then(data => {
-            updateSummaryCards(data.dashboardData);
-            updateRevenueChart(data.dashboardData.revenueData);
-            updateTopSellingItems(data.topSellingItems);
-            updateLeastSellingItem(data.leastSellingItem); // Update least-selling item
+            if (data.dashboardData && data.dashboardData.peakHours) {
+                createBusiestHoursChart(data.dashboardData.peakHours);
+                document.getElementById("totalOrders").innerText = data.dashboardData.totalOrders;
+                document.getElementById("totalRevenue").innerText = `฿${data.dashboardData.totalRevenue.toFixed(2)}`;
+                document.getElementById("preparationTime").innerText = data.dashboardData.avgPreparationTime;
+            } else {
+                console.error("No dashboard data received:", data);
+            }
         })
-        .catch(error => console.error("Error fetching dashboard data:", error));
+        .catch(error => console.error("Error fetching peak hours data:", error));
     }
 
-    dateRangeSelect.addEventListener("change", function() {
-        fetchDashboardData(this.value);
-    });
+    // Initialize chart with data from the server
+    fetchPeakHoursData();
 
-    fetchDashboardData();
+    dateRangeSelect.addEventListener("change", function() {
+        fetchPeakHoursData();
+    });
 });
 </script>
 {% endblock %}

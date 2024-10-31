@@ -41,13 +41,14 @@ document.addEventListener('DOMContentLoaded', function () {
             })
             .then(data => {
                 console.log(data);
-                updateDashboard(data.dashboardData, data.topSellingItems);
+                updateDashboard(data.dashboardData, data.topSellingItems, data.leastSellingItems); // Pass least selling items
             })
             .catch(error => {
                 console.error('Error fetching dashboard data:', error);
                 showErrorMessage('No data.');
             });
     }
+
     function showErrorMessage(message) {
         // Create or update error message element
         let errorDiv = document.getElementById('dashboard-error');
@@ -66,7 +67,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }, 5000);
     }
 
-    function updateDashboard(data, topSellingItems) {
+    function updateDashboard(data, topSellingItems, leastSellingItems) {
         // Update summary cards
         document.getElementById('totalOrders').textContent = data.totalOrders;
         document.getElementById('totalRevenue').textContent =
@@ -80,8 +81,10 @@ document.addEventListener('DOMContentLoaded', function () {
 
         // Update top selling items
         updateTopSellingItems(topSellingItems);
-    }
 
+        // Update least selling items
+        updateLeastSellingItems(leastSellingItems);
+    }
 
     function updateRevenueChart(data) {
         const ctx = document.getElementById('revenueChart').getContext('2d');
@@ -160,11 +163,8 @@ document.addEventListener('DOMContentLoaded', function () {
     function updateTopSellingItems(topSellingItems) {
         const topSellingList = document.getElementById('topSellingList');
         topSellingList.innerHTML = '';
-    
+
         topSellingItems.forEach((item, index) => {
-            const imageUrl = item.image || 'path/to/default/image.png';
-            console.log(imageUrl);  // Check if the correct URL is logged
-    
             const li = document.createElement('li');
             li.innerHTML = `
                 <div class="item-details">
@@ -175,7 +175,23 @@ document.addEventListener('DOMContentLoaded', function () {
             topSellingList.appendChild(li);
         });
     }
-    
+
+    function updateLeastSellingItems(leastSellingItems) {
+        const leastSellingList = document.getElementById('leastSellingItem');
+        leastSellingList.innerHTML = '';
+
+        leastSellingItems.forEach((item, index) => {
+            const li = document.createElement('li');
+            li.innerHTML = `
+                <div class="item-details">
+                    <h3>${index + 1}. ${item.name}</h3>
+                    <p>Sold: ${item.sold}</p>
+                </div>
+            `;
+            leastSellingList.appendChild(li);
+        });
+    }
+
     const dateRangeSelect = document.getElementById('dateRangeSelect');
     dateRangeSelect.addEventListener('change', function () {
         const selectedDateRange = this.value;
@@ -185,4 +201,3 @@ document.addEventListener('DOMContentLoaded', function () {
     // Initial load
     fetchDashboardData('today');
 });
-

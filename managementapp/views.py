@@ -409,12 +409,13 @@ def dashboard(request):
             else Order.objects.all()
         )
         payments = Payment.objects.filter(order__in=orders)
-        print(payments)
 
         # Calculate total orders, total revenue, and average order value
         total_orders = orders.count()
         total_revenue = payments.aggregate(total=Sum("amount"))["total"] or 0
         avg_order_value = round(total_revenue / total_orders, 2) if total_orders else 0
+
+        # Average preparation time
         preparation_time_data = orders.annotate(
             preparation_time=ExpressionWrapper(
                 F("completed_at") - F("created_at"), output_field=DurationField()
@@ -422,10 +423,7 @@ def dashboard(request):
         ).aggregate(avg_preparation_time=Avg("preparation_time"))
 
         avg_preparation_time = preparation_time_data['avg_preparation_time']
-        if avg_preparation_time:
-            avg_preparation_time = format_duration(avg_preparation_time)  # Convert to hh:mm:ss
-        else:
-            avg_preparation_time = 'N/A'
+        avg_preparation_time = format_duration(avg_preparation_time) if avg_preparation_time else 'N/A'
 
         # Revenue data over time
         revenue_data = (
@@ -443,18 +441,22 @@ def dashboard(request):
             .order_by("-sold")[:5]
         )
 
+        # Least selling items
+        least_selling_items = (
+            OrderItem.objects.filter(order__in=orders)
+            .values("menu_item__name", "menu_item__image")
+            .annotate(sold=Sum("quantity"))
+            .order_by("sold")[:5]  # Ascending order to get least selling
+        )
+
         # Calculate peak hours
-        if Order.objects.filter(completed_at__isnull=False).exists():
-            peak_hours_data = (
-                Order.objects.filter(completed_at__isnull=False)
-                .annotate(hour=TruncHour("completed_at"))
-                .values("hour")
-                .annotate(order_count=Count("id"))
-                .order_by("-order_count")
-            )
-            peak_hours = peak_hours_data[:5]
-        else:
-            peak_hours = []
+        peak_hours_data = (
+            Order.objects.filter(completed_at__isnull=False)
+            .annotate(hour=TruncHour("completed_at"))
+            .values("hour")
+            .annotate(order_count=Count("id"))
+            .order_by("-order_count")
+        )[:5] if Order.objects.filter(completed_at__isnull=False).exists() else []
 
         # Prepare data for the frontend
         dashboard_data = {
@@ -464,7 +466,7 @@ def dashboard(request):
             "revenueData": list(revenue_data),
             "peakHours": [
                 {"hour": peak["hour"].strftime('%H:%M') if peak["hour"] else "N/A", "order_count": peak["order_count"]}
-                for peak in peak_hours
+                for peak in peak_hours_data
             ],
         }
 
@@ -477,10 +479,20 @@ def dashboard(request):
             for item in top_selling_items
         ]
 
+        least_selling = [
+            {
+                "name": item["menu_item__name"],
+                "sold": item["sold"],
+                "image": item["menu_item__image"],
+            }
+            for item in least_selling_items
+        ]
+
         # Return JSON response
         return JsonResponse(
-            {"dashboardData": dashboard_data, "topSellingItems": top_selling}
+            {"dashboardData": dashboard_data, "topSellingItems": top_selling, "leastSellingItems": least_selling}
         )
+    
     return render(request, 'managementapp/dashboard.html')
 
 @require_http_methods(["GET", "POST"])
